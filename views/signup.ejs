@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Login</title>
+    <title>Sign Up</title>
     <link rel='stylesheet' href='/stylesheets/style.css' />
     <script src="javascripts/require.js"></script>
   </head>
   <body>
     <%- include('navbar') %>
-    <h1>Login Form</h1>
-    <form id="loginForm">
+    <h1>Sign UP Form</h1>
+    <form id="signupform">
         <label for="email" >Email</label><br>
         <input type="text" id="emailField" name="emailField"><br>
         <label for="password">Password</label><br>
@@ -18,15 +18,14 @@
     
   </body>
   <script>
-    var form = document.getElementById("loginForm");
+    var form = document.getElementById("signupform");
     async function sendLogin(event){
         event.preventDefault();
         var email = document.getElementById("emailField").value;
         var pass = document.getElementById("passField").value;
-        // console.log(email, pass);
 
-        // Post-Request to Login
-        const authEndPoint = "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyAL9QXZnvWQAPAnFlXXQhdInCs7qkD3Xbc"
+        // Post-Request to Sign Up
+        const authEndPoint = "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyAL9QXZnvWQAPAnFlXXQhdInCs7qkD3Xbc"
         var response = await fetch(authEndPoint, {
             method: "POST",
             body: JSON.stringify({
@@ -37,17 +36,15 @@
         })
         
         var json = await response.json()
-        console.log(json)
         if (response.status == 200){
-            console.log("Success Login")
+            console.log("Success Sign Up")
             localStorage.setItem("firebtoken", json.idToken)
-            localStorage.setItem("uid", json.localId)
-
-            // Redirect to Home
-            window.location.href = "/"
+            
+            // Redirect to settings
+            window.location.href = "/settings"
         }
         else{
-            alert("Tried but failed to login")
+            alert("Tried but failed to Sign Up")
         }
 
     }

@@ -8,15 +8,18 @@ var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 
 var app = express();
+var serviceAccount = require("/home/brandon/HT24/NumberFitCrowdFunding/env/service.json");
 
 const { initializeApp } = require('firebase-admin/app');
 const { getAuth } = require('firebase-admin/auth');
-initializeApp();
+var admin = require("firebase-admin");
+initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
 
 // Proof that we can connect the Firebase Auth
 var uid = 'HksrUaKZ3fXciEGyRE4SbVFXfgc2';
-getAuth()
-  .getUser(uid)
+getAuth().getUser(uid)
   .then((userRecord) => {
     // See the UserRecord reference doc for the contents of userRecord.
     console.log(`Successfully fetched user data: ${userRecord.toJSON()}`);
