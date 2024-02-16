@@ -2,41 +2,49 @@
 <html>
   <head>
     <title>Login</title>
-    <%- include('styles') %>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
     <script src="javascripts/require.js"></script>
   </head>
   <body>
     <%- include('navbar') %>
     <h1>Login Form</h1>
-    
-
+    <form id="loginForm">
+        <label for="email" >Email</label><br>
+        <input type="text" id="emailField" name="emailField"><br>
+        <label for="password">Password</label><br>
+        <input type="password" id="passField" name="passField">
+        <button type="submit">Submit</button>
+    </form>
     
   </body>
-
-  <script type="module">
-    import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
-
-    const auth = getAuth();
-    createUserWithEmailAndPassword(auth, email, password)
-    .then((userCredential) => {
-        // Signed up 
-        const user = userCredential.user;
-        // ...
-    })
-    .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        // ..
-    });
-  </script>
   <script>
+    var form = document.getElementById("loginForm");
+    async function sendLogin(event){
+        event.preventDefault();
+        var email = document.getElementById("emailField").value;
+        var pass = document.getElementById("passField").value;
+        // console.log(email, pass);
 
-    // var ui = new firebaseui.auth.AuthUI(firebase.auth());
-    // ui.start('#firebaseui-auth-container', {
-    //     signInOptions: [
-    //         firebase.auth.EmailAuthProvider.PROVIDER_ID
-    //     ],
-    //     // Other config options...
-    // });
+        // Post-Request to Login
+        const authEndPoint = "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyAL9QXZnvWQAPAnFlXXQhdInCs7qkD3Xbc"
+        var response = await fetch(authEndPoint, {
+            method: "POST",
+            body: JSON.stringify({
+                email: email,
+                password: pass
+            })
+        })
+        
+        var json = await response.json()
+        if (response.status == 200){
+            console.log("Success Login")
+            localStorage.setItem("firebtoken", json.idToken)
+        }
+        else{
+            alert("Tried but failed to login")
+        }
+
+    }
+    form.addEventListener('submit', sendLogin);
     </script>
 </html>
