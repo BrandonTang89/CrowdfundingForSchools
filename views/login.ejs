@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Login</title>
+    <%- include('styles') %>
+    <script src="javascripts/require.js"></script>
+  </head>
+  <body>
+    <%- include('navbar') %>
+    <h1>Login Form</h1>
+    
+
+    
+  </body>
+
+  <script type="module">
+    import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+
+    const auth = getAuth();
+    createUserWithEmailAndPassword(auth, email, password)
+    .then((userCredential) => {
+        // Signed up 
+        const user = userCredential.user;
+        // ...
+    })
+    .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        // ..
+    });
+  </script>
+  <script>
+
+    // var ui = new firebaseui.auth.AuthUI(firebase.auth());
+    // ui.start('#firebaseui-auth-container', {
+    //     signInOptions: [
+    //         firebase.auth.EmailAuthProvider.PROVIDER_ID
+    //     ],
+    //     // Other config options...
+    // });
+    </script>
+</html>

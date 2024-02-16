@@ -9,6 +9,24 @@ var usersRouter = require('./routes/users');
 
 var app = express();
 
+const { initializeApp } = require('firebase-admin/app');
+const { getAuth } = require('firebase-admin/auth');
+initializeApp();
+
+// Proof that we can connect the Firebase Auth
+var uid = 'HksrUaKZ3fXciEGyRE4SbVFXfgc2';
+getAuth()
+  .getUser(uid)
+  .then((userRecord) => {
+    // See the UserRecord reference doc for the contents of userRecord.
+    console.log(`Successfully fetched user data: ${userRecord.toJSON()}`);
+    console.log(userRecord)
+  })
+  .catch((error) => {
+    console.log('Error fetching user data:', error);
+  });
+
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');

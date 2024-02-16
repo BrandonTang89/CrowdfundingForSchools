@@ -10,7 +10,11 @@
     "debug": "~2.6.9",
     "ejs": "~2.6.1",
     "express": "~4.16.1",
+    "firebase": "^10.8.0",
+    "firebase-admin": "^12.0.0",
+    "firebaseui": "^6.1.0",
     "http-errors": "~1.6.3",
-    "morgan": "~1.9.1"
+    "morgan": "~1.9.1",
+    "requirejs": "^2.3.6"
   }
 }
