@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html>
   <head>
     <title>Sign Up</title>
@@ -9,45 +8,56 @@
     <%- include('navbar') %>
     <h1>Sign UP Form</h1>
     <form id="signupform">
-        <label for="email" >Email</label><br>
+        <label for="email">Email</label><br>
         <input type="text" id="emailField" name="emailField"><br>
         <label for="password">Password</label><br>
-        <input type="password" id="passField" name="passField">
+        <input type="password" id="passField" name="passField"><br>
+        <label for="confirmPassword">Confirm Password</label><br>
+        <input type="password" id="confirmPassField" name="confirmPassField">
         <button type="submit">Submit</button>
     </form>
-    
-  </body>
-  <script>
-    var form = document.getElementById("signupform");
-    async function sendLogin(event){
-        event.preventDefault();
-        var email = document.getElementById("emailField").value;
-        var pass = document.getElementById("passField").value;
 
-        // Post-Request to Sign Up
-        const authEndPoint = "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyAL9QXZnvWQAPAnFlXXQhdInCs7qkD3Xbc"
-        var response = await fetch(authEndPoint, {
-            method: "POST",
-            body: JSON.stringify({
-                email: email,
-                password: pass,
-                returnSecureToken: true
-            })
-        })
-        
-        var json = await response.json()
-        if (response.status == 200){
-            console.log("Success Sign Up")
-            localStorage.setItem("firebtoken", json.idToken)
-            
-            // Redirect to settings
-            window.location.href = "/settings"
-        }
-        else{
-            alert("Tried but failed to Sign Up")
+    <script>
+        var form = document.getElementById("signupform");
+        async function sendLogin(event) {
+            event.preventDefault();
+            var email = document.getElementById("emailField").value;
+            var pass = document.getElementById("passField").value;
+            var confirmPass = document.getElementById("confirmPassField").value;
+
+            if (pass !== confirmPass) {
+                alert("Passwords do not match");
+                return;
+            }
+
+            // Post-Request to Sign Up
+            var response = await fetch("/signup", {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    email: email,
+                    password: pass,
+                    returnSecureToken: true
+                })
+            });
+
+            var json = await response.json();
+            if (response.status == 200) {
+                console.log("Success Sign Up");
+                localStorage.setItem("firebtoken", json.idToken);
+                localStorage.setItem("uid", json.localId);
+
+                // Redirect to settings
+                window.location.href = "/settings" + "/" + json.idToken;
+            } else {
+                alert("Tried but failed to Sign Up");
+            }
         }
 
-    }
-    form.addEventListener('submit', sendLogin);
+        form.addEventListener('submit', sendLogin);
     </script>
+  </body>
 </html>
+       

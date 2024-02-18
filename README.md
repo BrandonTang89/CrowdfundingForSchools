@@ -54,6 +54,9 @@ Modify the line in app.js that sets where to find the service account key.
 
 (So if you are trying to use this, you need to make a /env in the project root and then put the service.json file there).
 
+### Firebase Web API Key
+Should be stored in the .env file as `FIREBASE_API_KEY`.
+
 ## Authentication
 We use Firebase Authentication. Currently just supports email/password authentication.
 

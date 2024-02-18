@@ -1,25 +1,62 @@
 var express = require('express');
 const { getAuth } = require('firebase-admin/auth');
+const axios = require('axios');
 var router = express.Router();
 
 /* GET home page. */
-router.get('/', function(req, res, next) {
+router.get('/', function(req, res) {
   res.render('index', { title: 'Express' });
 });
 
-router.get('/about', function(req, res, next) {
+router.get('/about', function(req, res) {
   res.render('about');
 });
 
-router.get('/login', function(req, res, next) {
+router.get('/login', function(req, res) {
   res.render('login');
 });
 
-router.get('/signup', function(req, res, next) {
+router.post('/login', function(req, res) {
+  const authEndPoint = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${process.env.API_KEY}`;
+  const requestData = req.body;
+
+  axios.post(authEndPoint, requestData)
+    .then(response => {
+      // Handle the response
+      console.log(response.data);
+      res.send(response.data);
+    })
+    .catch(error => {
+      // Handle the error
+      console.log(error);
+      res.send(error);
+    });
+});
+
+router.get('/signup', function(req, res) {
   res.render('signup');
 });
 
-router.get('/settings/:firebtoken', async function(req, res, next) {
+router.post('/signup', function(req, res) {
+  const authEndPoint = `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${process.env.API_KEY}`
+  const requestData = req.body;
+  console.log(requestData);
+
+  axios.post(authEndPoint, requestData)
+    .then(response => {
+      // Handle the response
+      console.log(response.data);
+      res.send(response.data);
+    })
+    .catch(error => {
+      // Handle the error
+      console.log(error);
+      res.send(error);
+    });
+    
+});
+
+router.get('/settings/:firebtoken', async function(req, res) {
   try{
     var decodedToken = await getAuth().verifyIdToken(req.params.firebtoken);
     var uid = decodedToken.uid;

@@ -1,13 +1,14 @@
 var createError = require('http-errors');
-var express = require('express');
+const express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+require('dotenv').config();
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
-
 var app = express();
+app.use(express.json());
 var serviceAccount = require("/home/brandon/HT24/NumberFitCrowdFunding/env/service.json");
 
 const { initializeApp } = require('firebase-admin/app');
