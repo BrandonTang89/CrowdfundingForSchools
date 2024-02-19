@@ -6,14 +6,10 @@
   </head>
   <body>
     <%- include('navbar') %>
-    <h1>Sign UP Form</h1>
+    <h1>Sign Up Form</h1>
     <form id="signupform">
         <label for="email">Email</label><br>
         <input type="text" id="emailField" name="emailField"><br>
-        <label for="password">Password</label><br>
-        <input type="password" id="passField" name="passField"><br>
-        <label for="confirmPassword">Confirm Password</label><br>
-        <input type="password" id="confirmPassField" name="confirmPassField">
         <button type="submit">Submit</button>
     </form>
 
@@ -22,24 +18,15 @@
         async function sendLogin(event) {
             event.preventDefault();
             var email = document.getElementById("emailField").value;
-            var pass = document.getElementById("passField").value;
-            var confirmPass = document.getElementById("confirmPassField").value;
-
-            if (pass !== confirmPass) {
-                alert("Passwords do not match");
-                return;
-            }
 
             // Post-Request to Sign Up
-            var response = await fetch("/signup", {
+            var response = await fetch("/auth/signup", {
                 method: "POST",
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
                     email: email,
-                    password: pass,
-                    returnSecureToken: true
                 })
             });
 
@@ -50,7 +37,7 @@
                 localStorage.setItem("uid", json.localId);
 
                 // Redirect to settings
-                window.location.href = "/settings" + "/" + json.idToken;
+                window.location.href = "/auth/verify?firebtoken=" + json.idToken;
             } else {
                 alert("Tried but failed to Sign Up");
             }

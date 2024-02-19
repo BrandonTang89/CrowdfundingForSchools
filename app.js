@@ -7,29 +7,17 @@ require('dotenv').config();
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
+var authRouter = require('./routes/auth');
+
 var app = express();
 app.use(express.json());
-var serviceAccount = require("/home/brandon/HT24/NumberFitCrowdFunding/env/service.json");
+var serviceAccount = require("./env/service.json");
 
 const { initializeApp } = require('firebase-admin/app');
-const { getAuth } = require('firebase-admin/auth');
 var admin = require("firebase-admin");
 initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
-
-// Proof that we can connect the Firebase Auth
-var uid = 'HksrUaKZ3fXciEGyRE4SbVFXfgc2';
-getAuth().getUser(uid)
-  .then((userRecord) => {
-    // See the UserRecord reference doc for the contents of userRecord.
-    console.log(`Successfully fetched user data: ${userRecord.toJSON()}`);
-    console.log(userRecord)
-  })
-  .catch((error) => {
-    console.log('Error fetching user data:', error);
-  });
-
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -42,6 +30,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
+app.use('/auth', authRouter);
 app.use('/users', usersRouter);
 
 // catch 404 and forward to error handler

@@ -29,6 +29,7 @@ router.post('/login', function(req, res) {
     .catch(error => {
       // Handle the error
       console.log(error);
+      res.status(401);
       res.send(error);
     });
 });
@@ -37,24 +38,7 @@ router.get('/signup', function(req, res) {
   res.render('signup');
 });
 
-router.post('/signup', function(req, res) {
-  const authEndPoint = `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${process.env.API_KEY}`
-  const requestData = req.body;
-  console.log(requestData);
 
-  axios.post(authEndPoint, requestData)
-    .then(response => {
-      // Handle the response
-      console.log(response.data);
-      res.send(response.data);
-    })
-    .catch(error => {
-      // Handle the error
-      console.log(error);
-      res.send(error);
-    });
-    
-});
 
 router.get('/settings/:firebtoken', async function(req, res) {
   try{
@@ -63,6 +47,9 @@ router.get('/settings/:firebtoken', async function(req, res) {
 
     try{
       var userRecord = await getAuth().getUser(uid)
+      if (userRecord.emailVerified == false){
+        return res.redirect('/auth/verify?firebtoken=' + req.params.firebtoken);
+      }
       var email = userRecord.email;
       var displayName = userRecord.displayName;
 
@@ -80,6 +67,5 @@ router.get('/settings/:firebtoken', async function(req, res) {
   }
   
 });
-
 
 module.exports = router;
