@@ -163,7 +163,7 @@ sudo docker run --name mypostgres -e POSTGRES_PASSWORD=hellohello -d -p 5432:543
 We can create our database layout using the following commands:
 ```
 psql -h localhost -p 5432 -U postgres -c "CREATE DATABASE crowdfundingsitedb"
-psql -h localhost -p 5432 -U postgres -d crowdfundingsitedb -f createDatabase.sql
+psql -h localhost -p 5432 -U postgres -d crowdfundingsitedb -f sqlscripts/createDatabase.sql
 ```
 
 ## Database Schema
@@ -181,7 +181,7 @@ Stores the roles of administrators and teachers for each school. Administrators 
 
 ### Projects Table
 Stores the projects that are to be funded
-- **ProjectID** : Integer, Unique identifier for the project, randomly generated
+- **ProjectID** : Serial, Unique identifier for the project, randomly generated
 - School: String, Name of school
 - Title: String, Title of the project
 - Description: String, Description of the project
@@ -192,7 +192,7 @@ Stores the projects that are to be funded
 
 ### Donations Table
 Stores the list of donations made to projects
-- **DonationID** : Integer, Unique identifier for the donation, randomly generated
+- **DonationID** : Serial, Unique identifier for the donation, randomly generated
 - ProjectID: Integer, Unique identifier for the project
 - UID: String, Firebase Auth UID
 - Amount: Integer, Amount of money donated

@@ -11,9 +11,10 @@ CREATE TABLE Users (
 
 DROP TABLE IF EXISTS Roles;
 CREATE TABLE Roles (
-    UserID VARCHAR(255) PRIMARY KEY,
+    UserID VARCHAR(255),
     School VARCHAR(255),
-    Roles roletype
+    Roles roletype,
+    PRIMARY KEY (UserID, School)
 );
 
 DROP TABLE IF EXISTS Projects CASCADE;
