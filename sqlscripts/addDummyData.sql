@@ -4,8 +4,18 @@ VALUES ('Project 1', 'School 1', 'Description 1', 100, 0, 1, 'proposed'),
        ('Project 2', 'School 2', 'Description 2', 200, 0, 1, 'open'),
        ('Project 3', 'School 3', 'Description 3', 300, 0, 1, 'closed');
 
+-- Creates a new admin user
+DO $$
+DECLARE MYUID VARCHAR(255);
+BEGIN
+  MYUID := '0ESpzl9x9DgvoTazaQSjp4nEn8M2';
 
-INSERT INTO users (userid, email, default_school) 
-VALUES ('bQRUc63oPognMlGQod1fdkvl0jS2', '-', 'Oxford')
-ON CONFLICT (userid) DO NOTHING;
+  INSERT INTO users (userid, email, default_school) 
+  VALUES (MYUID, '-', 'Oxford')
+  ON CONFLICT (userid) DO NOTHING;
 
+  INSERT INTO roles (userid, school, roles)
+  VALUES (MYUID, 'Oxford', 'admin'),
+         (MYUID, 'Cambridge', 'admin')
+  ON CONFLICT (userid, school) DO NOTHING;
+END $$;

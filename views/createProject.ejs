@@ -8,6 +8,10 @@
     <%- include('navbar') %>
 
     <h1>Create a Project</h1>
+    <p>Note that you have to be a teacher or administrator of this school to create a project.
+      If you are not, you can propose a project and teachers can approve it.
+      <!-- To do is a link to it -->
+    </p>
 
     <form id="createProjectForm">
       <label for="title">Title:</label>
@@ -16,7 +20,11 @@
       <br />
       <label for="school">School:</label>
       <br />
-      <input type="text" id="school" name="school" />
+      <select id="school" name="school">
+        <% schools.forEach(function(school) { %>
+          <option value="<%= school %>"><%= school %></option>
+        <% }); %>
+      </select>
       <br />
       <label for="description">Description:</label>
       <br />
@@ -30,7 +38,44 @@
       <button type="submit">Create Project</button>
     </form>
 
-
   </body>
-  
+  <script>
+
+    var form = document.getElementById("createProjectForm");
+
+    async function sendCreateProject(event) {
+      event.preventDefault();
+      var title = document.getElementById("title").value;
+      var school = document.getElementById("school").value;
+      var description = document.getElementById("description").value;
+      var goalmoney = document.getElementById("goalmoney").value;
+
+      // Post-Request to Create Project
+      var response = await fetch("/projects/create", {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          title: title,
+          school: school,
+          description: description,
+          goalmoney: goalmoney,
+          firebtoken: localStorage.getItem("firebtoken")
+        })
+      });
+
+      var json = await response.json();
+      console.log(json);
+
+      if (response.status == 200) {
+        console.log("Success Create Project");
+        window.location.href = "/projects/view/" + json.projectId;
+      } else {
+        alert("Tried but failed to create project");
+      }
+    }
+
+    form.addEventListener("submit", sendCreateProject);
+  </script>  
 </html>

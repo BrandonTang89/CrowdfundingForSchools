@@ -2,10 +2,20 @@
 A Crowd Funding Project for Number Fit
 
 # TO-DO
+### Auth
 - Button with timer to re-send email for email verification
 - Much better dealing with user error:
     - Email already exists when signing up
     - Email not found when resetting password
+
+### Database
+- Route to edit projects (including deleting)
+- Route to propose projects
+- Route for teachers to approve projects
+- Route for administrators to promote/demote teachers/administrators
+
+### Payment
+- Everything related to stripe
 
 # Set-Up
 ## Running the express app
@@ -15,9 +25,6 @@ Install dependencies:
 Run the app:
 `DEBUG=numberfitcrowdfunding:* npm start`
 
-Installing PostgreSQL:
-`apt-get install postgresql-12`
-     
 ## Running Environment
 Tested on Node v20.11.1 on Ubuntu-20.04 running in WSL2.
 
@@ -53,6 +60,25 @@ This is used to access the Firebase REST API. Can be found by going to the fireb
     - Renders `settings.ejs` view. 
     - The firebase authentication token is verified and the user's data is presented to the client to modify. 
     - Contains a form for passsword reset and a form for account deletion.
+
+### /projects
++ GET `/projects`
+    - Renders `projects.ejs` view.
++ POST `projects`
+    - Takes as input a json object with filtering parameters and returns a list of projects that match the parameters.
++ GET `/projects/view/:projectID`
+    - Renders `projectview.ejs` view with information about the project.
+    - Provides a form to donate to the project. (todo)
++ GET `/projects/propose?firebtoken=[token]`
+    - Verifies the firebase token. If not valid then returns an error.
+    - If the user is a teacher or administrator then redirects to `/projects/create?firebtoken=[token]` otherwise renders the `proposeproject.ejs` view. (todo)
++ GET `/projects/create?firebtoken=[token]`
+    - Verifies the firebase token and checks if the user is an administrator or teacher for a school. If so renders the `createproject.ejs` view, otherwise returns an error.
+    - List of schools that the user can create a project for is passed to the template, allowing for a select box to be created.
++ POST `/projects/create`
+    - Receives a json object with the project details. Checks whether the proposer is an administrator or teacher for the school. If so, creates the project and returns the projectID, otherwise returns an error.
++ GET `/projects/edit/:projectID?firebtoken=[token]` (todo)
+    - Verifies the firebase token and checks if the user is an administrator or teacher for the school of the project. If so renders the `editproject.ejs` view, otherwise returns and error.
 
 ### /auth
 + POST `/auth/signup` 
@@ -133,6 +159,13 @@ sudo docker pull postgres
 sudo docker run --name mypostgres -e POSTGRES_PASSWORD=hellohello -d -p 5432:5432 postgres
 ```
 
+### Creating Our Database
+We can create our database layout using the following commands:
+```
+psql -h localhost -p 5432 -U postgres -c "CREATE DATABASE crowdfundingsitedb"
+psql -h localhost -p 5432 -U postgres -d crowdfundingsitedb -f sqlscripts/createDatabase.sql
+```
+
 ### Quick Docker Commands
 - `sudo docker ps` lists the running containers
 - `sudo docker stop [container_id]` stops the container
@@ -160,13 +193,6 @@ sudo docker run --name mypostgres -e POSTGRES_PASSWORD=hellohello -d -p 5432:543
 - `SELECT * FROM [table_name];` lists the rows in the table
 
 
-### Creating Our Database
-We can create our database layout using the following commands:
-```
-psql -h localhost -p 5432 -U postgres -c "CREATE DATABASE crowdfundingsitedb"
-psql -h localhost -p 5432 -U postgres -d crowdfundingsitedb -f sqlscripts/createDatabase.sql
-```
-
 ## Database Schema
 ### User Table
 Stores personal user data
@@ -190,7 +216,7 @@ Stores the projects that are to be funded
 - Current: Integer, Amount of money raised so far
 - MinDonation: Integer, Minimum amount of money that can be donated at once
 - Status: Enum("proposed", "open", "closed")
-- Proposer: String, Email of the proposer
+- Proposer: String, Firebase Auth UID of the proposer
 
 ### Donations Table
 Stores the list of donations made to projects
