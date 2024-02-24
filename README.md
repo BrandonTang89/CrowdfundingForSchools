@@ -10,10 +10,13 @@ A Crowd Funding Project for Number Fit
 # Set-Up
 ## Running the express app
 Install dependencies:
-`$ npm install`
+`npm install`
 
 Run the app:
-`$ DEBUG=numberfitcrowdfunding:* npm start`
+`DEBUG=numberfitcrowdfunding:* npm start`
+
+Installing PostgreSQL:
+`apt-get install postgresql-12`
      
 ## Running Environment
 Tested on Node v20.11.1 on Ubuntu-20.04 running in WSL2.
@@ -119,6 +122,51 @@ Reset Password:
 # Database
 We will use PostgreSQL for the database. The following is the schema, with primary key in bold.
 
+Version: psql (PostgreSQL) 12.17 (Ubuntu 12.17-0ubuntu0.20.04.1)
+
+## Database Setup
+We can set up the database locally using Docker.
+```
+sudo dockerd
+sudo docker pull postgres
+sudo docker run --name mypostgres -e POSTGRES_PASSWORD=hellohello -d -p 5432:5432 postgres
+```
+
+### Quick Docker Commands
+- `sudo docker ps` lists the running containers
+- `sudo docker stop [container_id]` stops the container
+- `sudo docker start [container_id]` starts the container
+- `sudo docker remove [container_id]` removes the container
+- `sudo docker exec -it [container_id] /bin/bash` enters the container
+
+### Connecting to the Database
+- Within the docker container running the database server we can use the following commands:
+    - `psql -U postgres` enters the psql shell
+    - `psql -U postgres -d [database_name]` enters the psql shell for a specific database
+- Outside the docker container (from the host machine) we can use the following commands:
+    - `psql -h localhost -U postgres` enters the psql shell
+    - `psql -h localhost -U postgres -d [database_name]` enters the psql shell for a specific database
+    - Note that we will need to type the password to enter the shell.
+
+### Quick PostgreSQL Commands
+- `\l` lists the databases
+- `\c [database_name]` connects to a database
+- `\dt` lists the tables
+- `\d [table_name]` describes the table
+- `\q` quits the shell
+- `DROP DATABASE [database_name];` deletes the database
+- `DROP TABLE [table_name];` deletes the table
+- `SELECT * FROM [table_name];` lists the rows in the table
+
+
+### Creating Our Database
+We can create our database layout using the following commands:
+```
+psql -h localhost -p 5432 -U postgres -c "CREATE DATABASE crowdfundingsitedb"
+psql -h localhost -p 5432 -U postgres -d crowdfundingsitedb -f createDatabase.sql
+```
+
+## Database Schema
 ### User Table
 Stores personal user data
 - **UID** : String, Firebase Auth UID
@@ -149,3 +197,7 @@ Stores the list of donations made to projects
 - UID: String, Firebase Auth UID
 - Amount: Integer, Amount of money donated
 - Date: Date, Date of donation
+
+
+## Database References
+- https://stackoverflow.com/questions/37694987/connecting-to-postgresql-in-a-docker-container-from-outside
