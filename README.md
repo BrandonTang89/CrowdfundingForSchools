@@ -49,7 +49,7 @@ This is used to access the Firebase REST API. Can be found by going to the fireb
 + GET `/settings/:firebaseauthIDToken`
     - Renders `settings.ejs` view. 
     - The firebase authentication token is verified and the user's data is presented to the client to modify. 
-    - Contains a form for passsword reset.
+    - Contains a form for passsword reset and a form for account deletion.
 
 ### /auth
 + POST `/auth/signup` 
