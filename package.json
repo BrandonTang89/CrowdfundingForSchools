@@ -17,6 +17,7 @@
     "firebaseui": "^6.1.0",
     "http-errors": "~1.6.3",
     "morgan": "~1.9.1",
+    "pg": "^8.11.3",
     "requirejs": "^2.3.6"
   }
 }

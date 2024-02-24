@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= project.title %> </title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+  </head>
+  <body>
+    <%- include('navbar') %>
+
+    <h1><%= project.title %></h1>
+    <p><%= project.description %></p>
+    <p>School: <%= project.school %></p>
+    <p>Goal: £<%= project.goalmoney %></p>
+    <p>Current: £<%= project.currentmoney %></p>
+    <p>Status: <%= project.status %></p>
+
+    <!-- To Do: Donation Form -->
+
+
+  </body>
+  
+</html>

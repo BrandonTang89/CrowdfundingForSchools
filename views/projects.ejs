@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Projects</title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+  </head>
+  <body>
+    <%- include('navbar') %>
+
+    <h1>Projects to Crowdfund</h1>
+    <a id="proposeLink">Propose a project</a>
+
+    <h2>List of Projects</h2>
+    <form id="filterForm">
+      <label for="filter">Search:</label>
+      <input type="text" id="searchQuery" name="searchQuery" />
+      <button type="submit">Filter</button>
+    </form>
+
+    <ol id="projectList">
+
+    </ol>
+  </body>
+  <script>
+    var form = document.getElementById("filterForm");
+    var projectList = document.getElementById("projectList");
+
+    async function sendFilter(event) {
+      event.preventDefault();
+      var searchQuery = document.getElementById("searchQuery").value;
+
+      // Post-Request to Filter Projects
+      var response = await fetch("/projects", {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          searchQuery: searchQuery
+        })
+      });
+
+      var json = await response.json();
+      console.log(json);
+
+      if (response.status == 200) {
+        console.log("Success Filter");
+        projectList.innerHTML = ""; // Clear existing project list
+
+        // To Do: More advanced project list such as school, status, etc.
+        json.projects.forEach(function(project) {
+          var li = document.createElement("li");
+          var link = document.createElement("a");
+          link.href = "/projects/view/" + project.projectid;
+          link.text = project.title;
+          li.appendChild(link);
+          projectList.appendChild(li);
+        });
+      } else {
+        alert("Tried but failed to get projects");
+      }
+    }
+
+    form.addEventListener('submit', sendFilter);
+
+    // Initial Load
+    sendFilter(new Event('submit'));
+
+    var proposeLink = document.getElementById('proposeLink');
+    if (localStorage.getItem('firebtoken')) {
+      proposeLink.href = '/projects/create/?firebtoken=' + localStorage.getItem('firebtoken');
+    } else {
+      proposeLink.style = 'display: none;';
+    }
+  </script>
+  
+</html>

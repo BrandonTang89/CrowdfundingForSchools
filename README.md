@@ -64,6 +64,7 @@ This is used to access the Firebase REST API. Can be found by going to the fireb
     - The email contains a link to `/auth/action?mode=verifyEmail&oobCode=[code]` which will verify the email.
 + GET `/auth/action?mode=verifyEmail&oobCode=[code]` 
     - Sends the email verification code to Firebase to verify the email. User is notified of success or failure.
+    - User record is also created within the database.
 + GET `/auth/forgot`
     - Renders `forgot.ejs` view.
 + GET `/auth/action?mode=sendResetPassword&email=[email]`
@@ -187,6 +188,7 @@ Stores the projects that are to be funded
 - Description: String, Description of the project
 - Goal: Integer, Amount of money to be raised
 - Current: Integer, Amount of money raised so far
+- MinDonation: Integer, Minimum amount of money that can be donated at once
 - Status: Enum("proposed", "open", "closed")
 - Proposer: String, Email of the proposer
 

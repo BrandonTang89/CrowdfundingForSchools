@@ -25,6 +25,7 @@ CREATE TABLE Projects (
     Description TEXT,
     GoalMoney INT,
     CurrentMoney INT,
+    MinDonation INT,
     Status statustype,
     ProposerEmail VARCHAR(255)
 );

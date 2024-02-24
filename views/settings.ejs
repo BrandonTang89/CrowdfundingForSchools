@@ -63,7 +63,10 @@
         console.log(json)
         if (response.status == 200){
             console.log("Success Change Password")
-            alert("Password Changed Successfully")
+            alert("Password Changed Successfully, you will need to sign in again with your new password.")
+            localStorage.removeItem("firebtoken")
+            localStorage.removeItem("uid")
+            window.location.href = "/login"
         }
         else{
             alert("Tried but failed to change password")

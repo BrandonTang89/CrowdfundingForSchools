@@ -8,11 +8,13 @@ require('dotenv').config();
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var authRouter = require('./routes/auth');
+var projectsRouter = require('./routes/projects');
 
 var app = express();
-app.use(express.json());
-var serviceAccount = require("./env/service.json");
+app.use(express.json()); 
 
+// Firebase Admin SDK
+var serviceAccount = require("./env/service.json");
 const { initializeApp } = require('firebase-admin/app');
 var admin = require("firebase-admin");
 initializeApp({
@@ -32,6 +34,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/auth', authRouter);
 app.use('/users', usersRouter);
+app.use('/projects', projectsRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

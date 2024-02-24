@@ -1,6 +1,8 @@
 var express = require('express');
 const { getAuth } = require('firebase-admin/auth');
+const { verifyUser } = require('../authFunctions.js');
 const axios = require('axios');
+const pool = require('../db.js');
 var router = express.Router();
 
 function generateRandomPassword(length) {
@@ -19,12 +21,10 @@ router.post('/signup', function(req, res) {
     email: req.body.email
   };
 
-
   const randomPassword = generateRandomPassword(8); // Change the length as per your requirement
   console.log(randomPassword);
-  requestData.password = "xxxxxxx"; // dummy password
+  requestData.password = randomPassword; // dummy password
 
-  console.log(requestData);
   axios.post(authEndPoint, requestData)
     .then(response => {
       // Handle the response
@@ -88,7 +88,6 @@ router.get('/forgot', function(req, res) {
 });
 
 router.get('/action', async function(req, res) {
-  // console.log("ACTION MODE: " + req.query.mode)
   if (req.query.mode == 'verifyEmail'){
     const emailVerifEndPoint = `https://identitytoolkit.googleapis.com/v1/accounts:update?key=${process.env.API_KEY}`;
     const requestData = {
@@ -98,7 +97,16 @@ router.get('/action', async function(req, res) {
     .then(response => {
       // Handle the response
       console.log(response.data);
-      // res.send(response.data);
+
+      // Create the user in the database
+      pool.query('INSERT INTO users (userid, email) VALUES ($1, $2)', [response.data.localId, response.data.email], (error, results) => {
+        if (error) {
+          console.log('Error inserting user into database:', error);
+          throw error;
+        }
+        console.log("Finished inserting user into database");
+      });
+
       res.send("Email verified, use the forgot password link to set your password.");
     })
     .catch(error => {
@@ -151,6 +159,7 @@ router.post('/resetpassword', function(req, res) {
     .catch(error => {
       // Handle the error
       console.log(error);
+      res.status(401);
       res.send(error);
     });
 });
@@ -174,19 +183,34 @@ router.post('/resetpasswordwithcode', function(req, res) {
     });
 });
   
-router.post('/deleteaccount', function(req, res) {
+router.post('/deleteaccount', async function(req, res) {
+  const requestData = req.body; // idToken
+  
+  const user = await verifyUser(requestData.idToken);
+  if (user.status == 401) {
+    res.status(401).send('Please log in to delete your account');
+    return;
+  }
+  
+  // Remove the user from the database
+  pool.query('DELETE FROM users WHERE userid = $1', [user.UserID], (error, results) => {
+    if (error) {
+      throw error;
+    }
+    console.log(results.rows);
+  });
+  
+  // Remove the user from Firebase
   const authEndPoint = `https://identitytoolkit.googleapis.com/v1/accounts:delete?key=${process.env.API_KEY}`;
-  const requestData = req.body;
-
-  axios.post(authEndPoint, requestData)
-    .then(response => {
+  axios.post(authEndPoint, { idToken: requestData.idToken })
+  .then(response => {
       // Handle the response
       console.log(response.data);
       res.send(response.data);
     })
     .catch(error => {
       // Handle the error
-      console.log(error);
+      console.log("failed with request data:", requestData);
       res.status(401);
       res.send(error);
     });

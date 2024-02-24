@@ -3,9 +3,8 @@ const { getAuth } = require('firebase-admin/auth');
 const axios = require('axios');
 var router = express.Router();
 
-/* GET home page. */
 router.get('/', function(req, res) {
-  res.render('index', { title: 'Express' });
+  res.render('index', { title: 'Numberfit Crowd-Funding Website' });
 });
 
 router.get('/about', function(req, res) {
@@ -37,8 +36,6 @@ router.post('/login', function(req, res) {
 router.get('/signup', function(req, res) {
   res.render('signup');
 });
-
-
 
 router.get('/settings/:firebtoken', async function(req, res) {
   try{
