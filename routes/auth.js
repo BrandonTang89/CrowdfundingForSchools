@@ -174,5 +174,22 @@ router.post('/resetpasswordwithcode', function(req, res) {
     });
 });
   
+router.post('/deleteaccount', function(req, res) {
+  const authEndPoint = `https://identitytoolkit.googleapis.com/v1/accounts:delete?key=${process.env.API_KEY}`;
+  const requestData = req.body;
+
+  axios.post(authEndPoint, requestData)
+    .then(response => {
+      // Handle the response
+      console.log(response.data);
+      res.send(response.data);
+    })
+    .catch(error => {
+      // Handle the error
+      console.log(error);
+      res.status(401);
+      res.send(error);
+    });
+});
 
 module.exports = router;

@@ -3,7 +3,6 @@
   <head>
     <title>User Settings</title>
     <link rel='stylesheet' href='/stylesheets/style.css' />
-    <script src="javascripts/require.js"></script>
   </head>
   <body>
     <%- include('navbar') %>
@@ -16,13 +15,21 @@
 
     <h2> Change Password </h2>
     <form id="changePassForm">
-        <label for="password">Password</label><br>
+        <label for="password">New Password</label><br>
         <input type="password" id="passField" name="passField"><br>
-        <label for="password">Confirm Password</label><br>
+        <label for="password">Confirm New Password</label><br>
         <input type="password" id="confirmPassField" name="confirmPassField">
         <button type="submit">Submit</button>
     </form>
-    
+
+
+    <h2> Delete Account </h2>
+    <!-- Probably better done as a modal in the future -->
+    <form id="deleteAccountForm">
+        <label for="email">Enter your email to confirm deletion</label><br>
+        <input type="text" id="confirmEmailField" name="confirmEmailField"><br>
+        <button type="submit">Delete Account</button>
+    </form>
   </body>
   <script>
     var form = document.getElementById("changePassForm");
@@ -63,5 +70,42 @@
         }
     }
     form.addEventListener('submit', sendChangePass);
+
+    var deleteAccountForm = document.getElementById("deleteAccountForm");
+    async function sendDeleteAccount(event){
+        event.preventDefault();
+        var email = document.getElementById("confirmEmailField").value;
+        var originalEmail = "<%= email || '' %>"
+        if (email != originalEmail){
+            alert("Email does not match")
+            return
+        }
+
+        
+        // Post Request to /auth/deleteaccount
+        var response = await fetch("/auth/deleteaccount", {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                idToken: localStorage.getItem("firebtoken"),
+            })
+        })
+
+        var json = await response.json()
+        console.log(json)
+        if (response.status == 200){
+            console.log("Success Delete Account")
+            localStorage.removeItem("firebtoken")
+            localStorage.removeItem("uid")
+            alert("Account Deleted Successfully")
+            window.location.href = "/"
+        }
+        else{
+            alert("Tried but failed to delete account")
+        }
+    }
+    deleteAccountForm.addEventListener('submit', sendDeleteAccount);
   </script>
 </html>

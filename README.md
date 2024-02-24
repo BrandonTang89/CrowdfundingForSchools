@@ -53,6 +53,7 @@ This is used to access the Firebase REST API. Can be found by going to the fireb
 
 ### /auth
 + POST `/auth/signup` 
+    - {email: String}
     - Creates a new user with email and randomly generated password. The user is then sent an email to verify their email and set their password.
 + GET `/auth/verify?firebtoken=[token]`
     - Sends a request to Firebase to verify the firebase ID token. 
@@ -71,13 +72,18 @@ This is used to access the Firebase REST API. Can be found by going to the fireb
     - Provides a form to reset the password.
     - Form sends a POST request to `/auth/resetpasswordwithcode`
 + POST `/auth/resetpasswordwithcode`
+    - {oobCode: String, newPassword: String}
     - Sends the password reset code to Firebase to reset the password.
     - Informs the user of success or failure.
     - Called from password reset form.
 + POST `/auth/resetpassword`
+    - {idToken: String, password: String}
     - Sends the new password to Firebase to reset the password.
     - Informs the user of success or failure.
     - Called from settings form.
++ POST `/auth/deleteaccount`
+    - {idToken: String}
+    - Deletes the user's account from Firebase and the database.
 
 ## Authentication
 We use Firebase Authentication. Currently just supports email/password authentication.
@@ -109,3 +115,37 @@ Reset Password:
 ### Relevant Documentation:
 - https://firebase.google.com/docs/reference/rest/auth#section-sign-in-email-password
 - https://firebase.google.com/docs/auth/admin/verify-id-tokens
+
+# Database
+We will use PostgreSQL for the database. The following is the schema, with primary key in bold.
+
+### User Table
+Stores personal user data
+- **UID** : String, Firebase Auth UID
+- Default_School: String, Name of school they would like to be the default
+
+### Roles Table
+Stores the roles of administrators and teachers for each school. Administrators can promote and demote teachers/other administrators for a school. Teachers (and administrators) can propose, approve, modify, open/close and delete projects for their school.
+
+- **UID** : String, Firebase Auth UID
+- **School** : String, Name of school
+- Roles : Enum("admin", "teacher")
+
+### Projects Table
+Stores the projects that are to be funded
+- **ProjectID** : Integer, Unique identifier for the project, randomly generated
+- School: String, Name of school
+- Title: String, Title of the project
+- Description: String, Description of the project
+- Goal: Integer, Amount of money to be raised
+- Current: Integer, Amount of money raised so far
+- Status: Enum("proposed", "open", "closed")
+- Proposer: String, Email of the proposer
+
+### Donations Table
+Stores the list of donations made to projects
+- **DonationID** : Integer, Unique identifier for the donation, randomly generated
+- ProjectID: Integer, Unique identifier for the project
+- UID: String, Firebase Auth UID
+- Amount: Integer, Amount of money donated
+- Date: Date, Date of donation
