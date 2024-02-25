@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Edit Project</title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+  </head>
+  <body>
+    <%- include('navbar') %>
+
+    <h1>Edit Project</h1>
+    <form id="editProjectForm">
+      <label for="title">Title:</label>
+      <br />
+      <input type="text" id="title" name="title" value="<%= project.title %>"/>
+      <br />
+      <label for="school">School:</label>
+      <br />
+      <input id="school" name="school" value="<%= project.school %>" disabled/>
+      <br />
+      <label for="description">Description:</label>
+      <br />
+      <input type="text" id="description" name="description" value="<%= project.description %>"/>
+      <br />
+      <label for="goalmoney">Goal Money:</label>
+      <br />
+      <input type="number" id="goalmoney" name="goalmoney" value="<%= project.goalmoney %>" />
+      <br />
+      <label for="currentmoney">Current Money:</label>
+      <br />
+      <input type="number" id="currentmoney" name="currentmoney" value="<%= project.currentmoney %>" disabled/>
+      <br />
+      <label for="Status">Status</label>
+      <br />
+      <select id="status" name="status">
+        <option value="proposed" <% if (project.status === "proposed") { %>selected<% } %> >Proposed</option>
+        <option value="open" <% if (project.status === "open") { %>selected<% } %> >Open</option>
+        <option value="closed" <% if (project.status === "closed") { %>selected<% } %> >Closed</option>
+      </select>
+      <br />
+      <br />
+      <button type="submit">Edit Project</button>
+    </form>
+
+
+    <h1> Delete Project </h1> 
+    <form id="deleteProjectForm">
+      <button type="submit">Delete Project</button>
+    </form>
+
+  </body>
+  <script>
+    var form = document.getElementById("editProjectForm");
+    async function sendCreateProject(event) {
+      event.preventDefault();
+      var title = document.getElementById("title").value;
+      var description = document.getElementById("description").value;
+      var goalmoney = document.getElementById("goalmoney").value;
+      var status = document.getElementById("status").value;
+
+      // Post-Request to Create Project
+      var response = await fetch("/projects/edit/<%= project.projectid %>", {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          title: title,
+          description: description,
+          goalmoney: goalmoney,
+          status: status,
+          firebtoken: localStorage.getItem("firebtoken")
+        })
+      });
+
+      var json = await response.json();
+      console.log(json);
+
+      if (response.status == 200) {
+        console.log("Success edit Project");
+        window.location.href = "/projects/view/" + json.projectid;
+      } else {
+        alert("Tried but failed to edit project");
+        console.log(json.msg);
+      }
+    }
+    form.addEventListener("submit", sendCreateProject);
+
+    var deleteForm = document.getElementById("deleteProjectForm");
+    async function sendDeleteProject(event) {
+      event.preventDefault();
+      var response = await fetch("/projects/delete/<%= project.projectid %>", {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          firebtoken: localStorage.getItem("firebtoken")
+        })
+      });
+
+      var json = await response.json();
+      console.log(json);
+
+      if (response.status == 200) {
+        console.log("Success delete Project");
+        window.location.href = "/projects";
+      } else {
+        alert("Tried but failed to delete project");
+        console.log(json.msg);
+      }
+    }
+    deleteForm.addEventListener("submit", sendDeleteProject);
+
+  </script>  
+</html>

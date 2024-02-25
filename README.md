@@ -9,10 +9,12 @@ A Crowd Funding Project for Number Fit
     - Email not found when resetting password
 
 ### Database
-- Route to edit projects (including deleting)
-- Route to propose projects
-- Route for teachers to approve projects
+- Route for non-contributors to propose a project
 - Route for administrators to promote/demote teachers/administrators
+- Much better filtering settings
+    - By school, status, etc
+- Better project listings, with sorting and stuff
+- Documentation for parameters and return type of each route.
 
 ### Payment
 - Everything related to stripe
@@ -25,11 +27,14 @@ Install dependencies:
 Run the app:
 `DEBUG=numberfitcrowdfunding:* npm start`
 
+Run the DB: (set-up below)
+`sudo dockerd`
+`sudo docker start postgres`
+
 ## Running Environment
 Tested on Node v20.11.1 on Ubuntu-20.04 running in WSL2.
 
 ## Environment Secrets
-
 ### Google Service Account for Firebase
 The service.json file is a private key that allows you to access the firebase project with a google service account to allow privilleged actions like modifying the database and authentication users.
 
@@ -44,6 +49,24 @@ Place within the project root in a folder called /env. This location is specifie
 Should be stored in a .env file as `FIREBASE_API_KEY`. 
 
 This is used to access the Firebase REST API. Can be found by going to the firebase project settings and looking for the `apiKey` in the code snippet shown.
+
+### Database Password
+Stored in the .env file as `POSTGRES_PASSWORD`
+
+# Code Style
+### Naming
+Regarding keys passed in JSON objects, good naming is key:
+- I have realised that using camelCase was not the move since there are ambiguities such as `userID` or `userId` amongst other things.
+- I have settled that all fields of the database will be written fully in lowercase: `userid`, `projectid`, etc. This should be preserved across the entire backend and front-end as much as possible.
+
+Regarding general code variables, I think camelCase is good.
+
+### API Return Types
+For the sake of consistency, we ensure that POST requests **always** returns a JSON object. This is becaues the standard pattern is that the client will try to read the JSON of the response.
+
+On the otherhand, GET requests should return either a String, either HTML or plaintext.
+
+We definitely need better documentation on what the return types of each route can return.
 
 # Routing
 ### /
@@ -69,6 +92,10 @@ This is used to access the Firebase REST API. Can be found by going to the fireb
 + GET `/projects/view/:projectID`
     - Renders `projectview.ejs` view with information about the project.
     - Provides a form to donate to the project. (todo)
++ POST `/projects/view/:projectID`
+    - {firebtoken: String}
+    - Determines if the user is a valid contributor to the project.
+    - Returns {msg: String} with success or failure.
 + GET `/projects/propose?firebtoken=[token]`
     - Verifies the firebase token. If not valid then returns an error.
     - If the user is a teacher or administrator then redirects to `/projects/create?firebtoken=[token]` otherwise renders the `proposeproject.ejs` view. (todo)
@@ -77,8 +104,18 @@ This is used to access the Firebase REST API. Can be found by going to the fireb
     - List of schools that the user can create a project for is passed to the template, allowing for a select box to be created.
 + POST `/projects/create`
     - Receives a json object with the project details. Checks whether the proposer is an administrator or teacher for the school. If so, creates the project and returns the projectID, otherwise returns an error.
-+ GET `/projects/edit/:projectID?firebtoken=[token]` (todo)
-    - Verifies the firebase token and checks if the user is an administrator or teacher for the school of the project. If so renders the `editproject.ejs` view, otherwise returns and error.
+    - Returns {msg: String, projectid: String}
++ GET `/projects/edit/:projectID?firebtoken=[token]`
+    - Checks if the user is a contributor for the project, is so then renders the `editproject.ejs` view, otherwise returns an error.
+    - Renders the `editproject.ejs` view with the project details.
++ POST `/projects/edit`
+    - {firebtoken: String, projectid: Integer, title: String, description: String, goal: Integer, status: String}
+    - Edits the project with the given projectID.
+    - Returns {msg: String}
++ POST `/projects/delete`
+    - {firebtoken: String, projectid: Integer}
+    - Deletes the project with the given projectID.
+    - Returns {msg: String}
 
 ### /auth
 + POST `/auth/signup` 
@@ -197,7 +234,7 @@ psql -h localhost -p 5432 -U postgres -d crowdfundingsitedb -f sqlscripts/create
 ### User Table
 Stores personal user data
 - **UID** : String, Firebase Auth UID
-- Default_School: String, Name of school they would like to be the default
+- DefaultSchool: String, Name of school they would like to be the default
 
 ### Roles Table
 Stores the roles of administrators and teachers for each school. Administrators can promote and demote teachers/other administrators for a school. Teachers (and administrators) can propose, approve, modify, open/close and delete projects for their school.

@@ -193,7 +193,7 @@ router.post('/deleteaccount', async function(req, res) {
   }
   
   // Remove the user from the database
-  pool.query('DELETE FROM users WHERE userid = $1', [user.UserId], (error, results) => {
+  pool.query('DELETE FROM users WHERE userid = $1', [user.userid], (error, results) => {
     if (error) {
       throw error;
     }

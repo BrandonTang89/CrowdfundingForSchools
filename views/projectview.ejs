@@ -15,7 +15,37 @@
     <p>Status: <%= project.status %></p>
 
     <!-- To Do: Donation Form -->
-
+    <a id="editProjectButton" style="display: none;">Edit Project</a>
   </body>
+
+  <script>
+
+    async function checkEligibility() {
+      var school = "<%= project.school %>";
+      var firebtoken = localStorage.getItem('firebtoken');
+      var response = await fetch("<%= project.projectid %>", {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          school: school,
+          firebtoken: firebtoken
+        })
+      });
+
+      var responseBody = await response.text();
+      if (response.status === 200) {
+        console.log("Eligible for editing: " + responseBody);
+        var editProjectButton = document.getElementById("editProjectButton");
+        editProjectButton.style.display = 'block';
+        editProjectButton.href = "/projects/edit/" + "<%= project.projectid %>" + "?firebtoken=" + firebtoken;
+      }
+      else {
+        console.log("Not Eligible for editing: " + responseBody);
+      }
+    }
+  checkEligibility();
+  </script>
   
 </html>

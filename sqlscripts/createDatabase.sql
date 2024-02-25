@@ -5,40 +5,40 @@ CREATE TYPE roletype AS ENUM ('admin', 'teacher');
 
 DROP TABLE IF EXISTS Users CASCADE;
 CREATE TABLE Users (
-    UserId VARCHAR(255) PRIMARY KEY,
-    Email VARCHAR(255),
-    Default_School VARCHAR(255)
+    userid VARCHAR(255) PRIMARY KEY,
+    email VARCHAR(255),
+    defaultschool VARCHAR(255)
 );
 
 DROP TABLE IF EXISTS Roles;
 CREATE TABLE Roles (
-    UserId VARCHAR(255),
-    School VARCHAR(255),
-    Roles roletype,
-    PRIMARY KEY (UserId, School)
+    userid VARCHAR(255),
+    school VARCHAR(255),
+    roles roletype,
+    PRIMARY KEY (userid, school)
 );
 
 DROP TABLE IF EXISTS Projects CASCADE;
 CREATE TABLE Projects (
-    ProjectID SERIAL PRIMARY KEY,
-    School VARCHAR(255),
-    Title VARCHAR(255),
-    Description TEXT,
-    GoalMoney INT,
-    CurrentMoney INT DEFAULT 0,
-    MinDonation INT,
-    Status statustype,
-    Proposer VARCHAR(255),
-    FOREIGN KEY (Proposer) REFERENCES Users(UserId)
+    projectid SERIAL PRIMARY KEY,
+    school VARCHAR(255),
+    title VARCHAR(255),
+    description TEXT,
+    goalmoney INT,
+    currentmoney INT DEFAULT 0,
+    mindonation INT,
+    status statustype,
+    proposer VARCHAR(255),
+    FOREIGN KEY (proposer) REFERENCES Users(userid)
 );
 
 DROP TABLE IF EXISTS Donations;
 CREATE TABLE Donations (
-    DonationID SERIAL,
-    ProjectID INT,
-    UserId VARCHAR(255),
-    Amount INT,
-    DonationDate DATE,
-    FOREIGN KEY (ProjectID) REFERENCES Projects(ProjectID),
-    FOREIGN KEY (UserId) REFERENCES Users(UserId)
+    donationid SERIAL,
+    projectid INT,
+    userid VARCHAR(255),
+    amount INT,
+    donationdate DATE,
+    FOREIGN KEY (projectid) REFERENCES Projects(projectid),
+    FOREIGN KEY (userid) REFERENCES Users(userid)
 );

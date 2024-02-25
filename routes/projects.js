@@ -3,6 +3,76 @@ var router = express.Router();
 const pool = require('../db.js');
 const { verifyUser } = require('../authFunctions.js');
 
+/** Determines whether the user is valid contributor at the school
+ * @param {String} firebtoken 
+ * @param {String} school
+ * @returns {iscontributor: Boolean, msg: String}
+ */
+async function isContributorAt(firebtoken, school){
+    // A contributor is a teacher/admin for a certain school
+    const user = await verifyUser(firebtoken);
+    if (user.status == 401) {
+        return {iscontributor: false, msg: "Not logged in"};
+    }
+
+    const userid = user.userid;
+
+    try {
+        const isContributorPromise = new Promise((resolve, reject) => {
+            pool.query("SELECT * FROM roles WHERE userid = $1 AND school = $2", [userid, school], (error, results) => {
+                if (error) {
+                    reject({iscontributor: false, msg: "Query error (bad)"});
+                }
+                if (results.rows.length == 0) {
+                    reject({ iscontributor: false, msg: "Not a teacher at this school" });
+                } else {
+                    resolve({ iscontributor: true, msg: "Success" });
+                }
+            });
+        });
+
+        const isContributor = await isContributorPromise;
+        return isContributor;
+    } catch (error) {
+        console.log(error);
+        return error
+    }
+}
+
+/** Determines whether the user is a valid contributor of a certain project.
+ * @param {String} firebtoken 
+ * @param {String} projectid 
+ * @returns {iscontributor: Boolean, msg: String, school: String}
+ * 
+ * Returns whether the user is a valid contributor, if so, what school.
+ */
+async function isContributorFor(firebtoken, projectid){
+    try {
+        const isContributorPromise = new Promise((resolve, reject) => {
+            pool.query("SELECT * FROM projects WHERE projectid = $1", [projectid], (error, results) => {
+                if (error) {
+                    reject({iscontributor: false, msg: "Query error (bad)"});
+                }
+                if (results.rows.length == 0) {
+                    reject({iscontributor: false, msg: "Project doesn't exist" });
+                } else {
+                    resolve({iscontributor: true, project: results.rows[0]});
+                }
+            });
+        });
+
+        const promiseRes = await isContributorPromise;
+        if (!promiseRes.iscontributor) return promiseRes;
+
+        var verif = await isContributorAt(firebtoken, promiseRes.project.school);
+        verif.project = promiseRes.project;
+        return verif;
+    } catch (error) {
+        console.log(error);
+        return error
+    }
+}
+
 router.get('/', function(req, res) {
     res.render('projects', { title: 'Numberfit Crowd-Funding Website' });
 });
@@ -28,12 +98,11 @@ router.get('/propose', function(req, res) {
         return;
     }
 
-    // To Do: Check that the user is a teacher/admin, if so redirect
+    // To Do: Check that the user is a contributor, if so redirect
     res.redirect('/projects/create?firebtoken=' + req.query.firebtoken);
 });
 
 router.get('/create', async function(req, res) {
-    
     const firebtoken = req.query.firebtoken;
     console.log(firebtoken);
 
@@ -43,8 +112,8 @@ router.get('/create', async function(req, res) {
         return;
     }
 
-    console.log(user);
-    pool.query("SELECT * FROM roles WHERE userid = $1", [user.UserId], (error, results) => {
+    console.log("User adding project: ", user);
+    pool.query("SELECT * FROM roles WHERE userid = $1", [user.userid], (error, results) => {
         if (error) {
             throw error;
         }
@@ -67,48 +136,35 @@ router.post('/create', async function(req, res) {
         return;
     }
 
-    const userId = user.UserId;
+    const userid = user.userid;
     const title = req.body.title;
     const school = req.body.school;
     const description = req.body.description;
     const goalMoney = req.body.goalMoney;
     const status = 'open';
 
+    // To Do: Validate the input
     // Check the Contributor is a teacher at the school
-    try {
-        await new Promise((resolve, reject) => {
-            pool.query("SELECT * FROM roles WHERE userid = $1 AND school = $2", [userId, school], (error, results) => {
-                if (error) {
-                    reject(error);
-                }
-                if (results.rows.length == 0) {
-                    res.status(401).send({msg: 'You are not a teacher at this school'});
-                    console.log('User is not a teacher at this school');
-                }
-                resolve();
-            });
-        });
-    } catch (error) {
-        throw error;
+    const verif = await isContributorAt(firebtoken, school);
+    if (!verif.iscontributor) {
+        res.status(401).send({msg: verif.msg});
+        return;
     }
 
-    if (res.headersSent) return; // Rejected, return
-
     // Add the project to the database
-    pool.query('INSERT INTO projects (title, school, description, goalMoney, proposer, status) VALUES ($1, $2, $3, $4, $5, $6) RETURNING projectid', [title, school, description, goalMoney, userId, status], (error, results) => {
+    pool.query('INSERT INTO projects (title, school, description, goalMoney, proposer, status) VALUES ($1, $2, $3, $4, $5, $6) RETURNING projectid', [title, school, description, goalMoney, userid, status], (error, results) => {
         if (error) {
             throw error;
         }
-        const projectId = results.rows[0].projectid;
-        console.log('New project ID:', projectId);
-        res.send({ projectId: projectId });
+        const projectid = results.rows[0].projectid;
+        console.log('New project ID:', projectid);
+        res.send({ projectid: projectid });
     });
 });
 
 
-router.get('/view/:projectId', function(req, res) {
-    const projectid = req.params.projectId;
-
+router.get('/view/:projectid', function(req, res) {
+    const projectid = req.params.projectid;
     pool.query('SELECT * FROM projects WHERE projectid = $1', [projectid], (error, results) => {
         if (error) {
             throw error;
@@ -123,6 +179,76 @@ router.get('/view/:projectId', function(req, res) {
         }
     });
 });
+
+router.post('/view/:projectid', async function(req, res) {
+    const firebtoken = req.body.firebtoken;
+    const projectid = req.params.projectid;
+    
+    const verif = await isContributorFor(firebtoken, projectid);
+    if (verif.iscontributor) res.send({msg: 'Success'});
+    else {
+        res.status(401).send(verif);
+    }
+});
+
+router.get('/edit/:projectid', async function(req, res) {
+    const projectid = req.params.projectid;
+    const firebtoken = req.query.firebtoken;
+
+    const verif = await isContributorFor(firebtoken, projectid);
+    if (!verif.iscontributor) {
+        res.status(401).send(verif);
+        return;
+    }
+
+    res.render('editProject', { project: verif.project });
+});
+
+router.post('/edit/:projectid', async function(req, res) {
+    const firebtoken = req.body.firebtoken;
+    const projectid = req.params.projectid
+    const title = req.body.title;
+    const description = req.body.description;
+    const goalMoney = req.body.goalMoney;
+    const status = req.body.status;
+
+    // Check the Contributor is a teacher at the school
+    const verif = await isContributorFor(firebtoken, projectid)
+    if (!verif.iscontributor){
+        res.status(401).send(verif)
+        return;
+    }
+    const school = verif.project.school;
+
+    // Update the project in the database
+    pool.query('UPDATE projects SET title = $1, school = $2, description = $3, goalMoney = $4, status = $5 WHERE projectid = $6', [title, school, description, goalMoney, status, projectid], (error, results) => {
+        if (error) {
+            throw error;
+        }
+        res.send({msg: "success", projectid: projectid});
+    });
+});
+
+router.post('/delete/:projectid', async function(req, res) {
+    const firebtoken = req.body.firebtoken;
+    const projectid = req.params.projectid;
+
+    // Check the Contributor is a teacher at the school
+    const verif = await isContributorFor(firebtoken, projectid)
+    if (!verif.iscontributor){
+        res.status(401).send(verif)
+        return;
+    }
+
+    // Delete the project from the database
+    pool.query('DELETE FROM projects WHERE projectid = $1', [projectid], (error, results) => {
+        if (error) {
+            throw error;
+        }
+        res.send({msg: "success"});
+    });
+});
+
 
 
 module.exports = router;
