@@ -1,6 +1,7 @@
 var express = require('express');
 const { getAuth } = require('firebase-admin/auth');
 const axios = require('axios');
+const pool = require('../db.js');
 var router = express.Router();
 
 router.get('/', function(req, res) {
@@ -50,7 +51,30 @@ router.get('/settings/:firebtoken', async function(req, res) {
       var email = userRecord.email;
       var displayName = userRecord.displayName;
 
-      res.render('settings', { uid: decodedToken.uid, email: email, displayName: displayName});
+      console.log('User data:', email, displayName);
+      
+      const getAdminSchools = (userid) => {
+        return new Promise((resolve, reject) => {
+          pool.query("SELECT * FROM roles WHERE userid = $1", [userid], (error, results) => {
+            if (error) {
+              reject(error);
+            }
+            const schools = results.rows.map(row => row.school);
+            resolve(schools);
+          });
+        });
+      };
+
+      var adminschools = {};
+      try {
+        adminschools = await getAdminSchools(uid);
+      } catch (error) {
+        console.log('Error fetching admin schools:', error);
+        res.status(401).send(error);
+        return;
+      }
+
+      res.render('settings', { uid: decodedToken.uid, email: email, displayName: displayName, adminschools: adminschools});
 
     }
     catch(error){

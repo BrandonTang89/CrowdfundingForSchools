@@ -7,6 +7,7 @@
   <body>
     <%- include('navbar') %>
 
+    <!-- Descriptions of the project -->
     <h1><%= project.title %></h1>
     <p><%= project.description %></p>
     <p>School: <%= project.school %></p>
@@ -15,6 +16,12 @@
     <p>Status: <%= project.status %></p>
 
     <!-- To Do: Donation Form -->
+    <form id="donationForm">
+      <button type="submit">Donate</button>
+    </form>
+
+    <br/>
+    <!-- Button linking to edit page -->
     <a id="editProjectButton" style="display: none;">Edit Project</a>
   </body>
 
@@ -46,6 +53,32 @@
       }
     }
   checkEligibility();
+
+
+  var donationLink = "";
+  async function checkDonation(){
+    var response = await fetch("/projects/donate/<%= project.projectid %>", {
+      method: "POST",
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({})
+    });
+
+    var json = await response.json();
+    if (response.status === 200) {
+      console.log("Eligible for donation: " + json.msg);
+      var donationForm = document.getElementById("donationForm");
+      donationForm.action = json.link;
+    }
+    else {
+      console.log("Not Eligible for donation: " + responseBody);
+      var donationForm = document.getElementById("donationForm");
+      donationForm.style.display = 'none';
+    }
+  }
+
+  checkDonation();
   </script>
   
 </html>

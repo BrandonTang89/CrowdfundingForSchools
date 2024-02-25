@@ -53,6 +53,13 @@ This is used to access the Firebase REST API. Can be found by going to the fireb
 ### Database Password
 Stored in the .env file as `POSTGRES_PASSWORD`
 
+### Stripe Secret Key
+Stored in the .env file as `STRIPE_KEY`
+
+## Known Issues
+### Firebase "Invalid Credential"
+This can occur when your system's time gets out of sync, causing Firebase to reject the server connecting to it via the admin SDK. Fix this via: `sudo hwclock -s`
+
 # Code Style
 ### Naming
 Regarding keys passed in JSON objects, good naming is key:
@@ -61,12 +68,25 @@ Regarding keys passed in JSON objects, good naming is key:
 
 Regarding general code variables, I think camelCase is good.
 
-### API Return Types
+### Return Types
 For the sake of consistency, we ensure that POST requests **always** returns a JSON object. This is becaues the standard pattern is that the client will try to read the JSON of the response.
 
 On the otherhand, GET requests should return either a String, either HTML or plaintext.
 
 We definitely need better documentation on what the return types of each route can return.
+
+Functions with `authFunctions.js` are utility functions that are used across the entire backend. For the sake of uniformity, they should always return a JSON object that at least contains a `msg` field. This should be "Success" or some error message.
+
+### Error Handling
+All functions within `authFunctions.js` should **never** throw errors. Any error that occurs within the function should be caught and returned as a JSON object with a `msg` field that contains the error message.
+
+HTTP routes should use the status header to report the success of operations. If the action is not a success then it should also return a JSON object with a `msg` field that contains the error message.
+
+# Testing vs Live
+When we convert to live production, we will need to ensure some actions are taken:
+- The return and refresh URLs of the connected account link should be changed to the live URLs.
+- The email verification link in the Firebase Auth template should be changed to the live URL.
+- The stripe secret key should be changed to the live key.
 
 # Routing
 ### /
@@ -83,7 +103,14 @@ We definitely need better documentation on what the return types of each route c
     - Renders `settings.ejs` view. 
     - The firebase authentication token is verified and the user's data is presented to the client to modify. 
     - Contains a form for passsword reset and a form for account deletion.
+    - Contains a link to schools available to manage (for admins).
 
+### /admin
++ GET `/admin/?school=[school]&firebtoken=[token]`
+    - Verifies the firebase token and checks if the user is an administrator for the school. 
+    - Checks whether the school has record within the database. If not, it also means the school has no stripe account so we create it.
+    - If the school has not yet finished onboarding then we direct the admin to the onboarding page.
+    - Renders `admin.ejs` view with the school's details.
 ### /projects
 + GET `/projects`
     - Renders `projects.ejs` view.
@@ -184,9 +211,7 @@ Reset Password:
 - https://firebase.google.com/docs/auth/admin/verify-id-tokens
 
 # Database
-We will use PostgreSQL for the database. The following is the schema, with primary key in bold.
-
-Version: psql (PostgreSQL) 12.17 (Ubuntu 12.17-0ubuntu0.20.04.1)
+We will use PostgreSQL for the database. The following is the schema, with primary key(s) in bold.
 
 ## Database Setup
 We can set up the database locally using Docker.
@@ -236,12 +261,17 @@ Stores personal user data
 - **UID** : String, Firebase Auth UID
 - DefaultSchool: String, Name of school they would like to be the default
 
+### Schools Table
+- **School** : String, Name of school
+- stripeid: String, Stripe connected account id
+- onboarded: Boolean, Whether the school has completed the onboarding process
+
 ### Roles Table
 Stores the roles of administrators and teachers for each school. Administrators can promote and demote teachers/other administrators for a school. Teachers (and administrators) can propose, approve, modify, open/close and delete projects for their school.
 
 - **UID** : String, Firebase Auth UID
 - **School** : String, Name of school
-- Roles : Enum("admin", "teacher")
+- Role : Enum("admin", "teacher")
 
 ### Projects Table
 Stores the projects that are to be funded
@@ -266,3 +296,28 @@ Stores the list of donations made to projects
 
 ## Database References
 - https://stackoverflow.com/questions/37694987/connecting-to-postgresql-in-a-docker-container-from-outside
+
+# Payment
+We will use Stripe for payment processing. Specifically we will be using Stripe Connect to enable the the schools to accept payments directly.
+
+We will share our stripe account: `numberfitcrowdfunding@gmail.com`
+
+## Basic Ideas
+- Stripe connect has 2 different models for marketplace payments:
+    - We can collect payments on behalf of the schools and then transfer the money to the schools.
+    - Or we can have the schools collect the payments directly.
+- Since the later makes more sense, we will be going for that.
+
+
+### Onboarding
+- When a school is created, we will need to onboard the school. This incolves the school administrator filling up a form which includes the payment method by which the school will receive the money
+- We do this when an admin tries to go the school settings page.
+- The record of whether the school has completed this onboarding is kept as a record in the schools table of the database
+
+### Donations
+- When a user creates a project, we first check if the school has completed the onboarding process and thus has a connected account. If not then we inform the user that the school cannot accept donations at the moment.
+- Else, when the project is created, we create a corresponding product in the school's stripe account along with a price. We then store the productID and priceID in the projects table.
+- When a user donates to a project, we create a checkout session with the productID and priceID. We then redirect the user to the checkout session URL.
+
+## Stripe References
+- https://docs.stripe.com/connect

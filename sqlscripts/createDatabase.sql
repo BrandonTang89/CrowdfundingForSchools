@@ -10,11 +10,18 @@ CREATE TABLE Users (
     defaultschool VARCHAR(255)
 );
 
+DROP TABLE IF EXISTS Schools CASCADE;
+CREATE TABLE Schools (
+    school VARCHAR(255) PRIMARY KEY,
+    stripeid VARCHAR(255),
+    onboarded BOOLEAN DEFAULT FALSE
+);
+
 DROP TABLE IF EXISTS Roles;
 CREATE TABLE Roles (
     userid VARCHAR(255),
     school VARCHAR(255),
-    roles roletype,
+    role roletype,
     PRIMARY KEY (userid, school)
 );
 
@@ -29,7 +36,10 @@ CREATE TABLE Projects (
     mindonation INT,
     status statustype,
     proposer VARCHAR(255),
-    FOREIGN KEY (proposer) REFERENCES Users(userid)
+    stripeproductid VARCHAR(255),
+    stripepriceid VARCHAR(255),
+    FOREIGN KEY (proposer) REFERENCES Users(userid),
+    FOREIGN KEY (school) REFERENCES Schools(school)
 );
 
 DROP TABLE IF EXISTS Donations;

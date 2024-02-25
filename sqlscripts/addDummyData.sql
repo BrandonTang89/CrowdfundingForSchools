@@ -14,7 +14,7 @@ BEGIN
   VALUES (MYUID, '-', 'Oxford')
   ON CONFLICT (userid) DO NOTHING;
 
-  INSERT INTO roles (userid, school, roles)
+  INSERT INTO roles (userid, school, role)
   VALUES (MYUID, 'Oxford', 'admin'),
          (MYUID, 'Cambridge', 'admin')
   ON CONFLICT (userid, school) DO NOTHING;

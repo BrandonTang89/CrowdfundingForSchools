@@ -1,80 +1,15 @@
 var express = require('express');
 var router = express.Router();
+const stripe = require('stripe')(process.env.STRIPE_KEY);
 const pool = require('../db.js');
-const { verifyUser } = require('../authFunctions.js');
-
-/** Determines whether the user is valid contributor at the school
- * @param {String} firebtoken 
- * @param {String} school
- * @returns {iscontributor: Boolean, msg: String}
- */
-async function isContributorAt(firebtoken, school){
-    // A contributor is a teacher/admin for a certain school
-    const user = await verifyUser(firebtoken);
-    if (user.status == 401) {
-        return {iscontributor: false, msg: "Not logged in"};
-    }
-
-    const userid = user.userid;
-
-    try {
-        const isContributorPromise = new Promise((resolve, reject) => {
-            pool.query("SELECT * FROM roles WHERE userid = $1 AND school = $2", [userid, school], (error, results) => {
-                if (error) {
-                    reject({iscontributor: false, msg: "Query error (bad)"});
-                }
-                if (results.rows.length == 0) {
-                    reject({ iscontributor: false, msg: "Not a teacher at this school" });
-                } else {
-                    resolve({ iscontributor: true, msg: "Success" });
-                }
-            });
-        });
-
-        const isContributor = await isContributorPromise;
-        return isContributor;
-    } catch (error) {
-        console.log(error);
-        return error
-    }
-}
-
-/** Determines whether the user is a valid contributor of a certain project.
- * @param {String} firebtoken 
- * @param {String} projectid 
- * @returns {iscontributor: Boolean, msg: String, school: String}
- * 
- * Returns whether the user is a valid contributor, if so, what school.
- */
-async function isContributorFor(firebtoken, projectid){
-    try {
-        const isContributorPromise = new Promise((resolve, reject) => {
-            pool.query("SELECT * FROM projects WHERE projectid = $1", [projectid], (error, results) => {
-                if (error) {
-                    reject({iscontributor: false, msg: "Query error (bad)"});
-                }
-                if (results.rows.length == 0) {
-                    reject({iscontributor: false, msg: "Project doesn't exist" });
-                } else {
-                    resolve({iscontributor: true, project: results.rows[0]});
-                }
-            });
-        });
-
-        const promiseRes = await isContributorPromise;
-        if (!promiseRes.iscontributor) return promiseRes;
-
-        var verif = await isContributorAt(firebtoken, promiseRes.project.school);
-        verif.project = promiseRes.project;
-        return verif;
-    } catch (error) {
-        console.log(error);
-        return error
-    }
-}
+const { verifyUser, 
+        isContributorFor, 
+        isContributorAt,
+        schoolQuery,
+        getProjectData } = require('../authFunctions.js');
 
 router.get('/', function(req, res) {
-    res.render('projects', { title: 'Numberfit Crowd-Funding Website' });
+    res.render('projects');
 });
 
 router.post('/', function(req, res){
@@ -112,7 +47,7 @@ router.get('/create', async function(req, res) {
         return;
     }
 
-    console.log("User adding project: ", user);
+    console.log("User loading project creation form: ", user);
     pool.query("SELECT * FROM roles WHERE userid = $1", [user.userid], (error, results) => {
         if (error) {
             throw error;
@@ -136,11 +71,13 @@ router.post('/create', async function(req, res) {
         return;
     }
 
+    console.log("User creating project: ", user, req.body)
     const userid = user.userid;
     const title = req.body.title;
     const school = req.body.school;
     const description = req.body.description;
-    const goalMoney = req.body.goalMoney;
+    var goalmoney = req.body.goalmoney;
+    if (goalmoney == '') goalmoney = 0;
     const status = 'open';
 
     // To Do: Validate the input
@@ -151,15 +88,74 @@ router.post('/create', async function(req, res) {
         return;
     }
 
+    // Check if the school is ready to receive donations
+    const schoolData = await schoolQuery(school);
+    if (schoolData.onboarded !== true){
+        res.status(501).send({msg: 'School not yet onboarded'});
+        return;
+    }
+
     // Add the project to the database
-    pool.query('INSERT INTO projects (title, school, description, goalMoney, proposer, status) VALUES ($1, $2, $3, $4, $5, $6) RETURNING projectid', [title, school, description, goalMoney, userid, status], (error, results) => {
-        if (error) {
-            throw error;
-        }
-        const projectid = results.rows[0].projectid;
-        console.log('New project ID:', projectid);
-        res.send({ projectid: projectid });
+    const insertPromise = new Promise((resolve, reject) => {
+        pool.query('INSERT INTO projects (title, school, description, goalmoney, proposer, status) VALUES ($1, $2, $3, $4, $5, $6) RETURNING projectid', [title, school, description, goalmoney, userid, status], (error, results) => {
+            if (error) {
+                reject(error);
+            }
+            const projectid = results.rows[0].projectid;
+            console.log('New project ID:', projectid);
+            resolve({ projectid: projectid });
+        });
     });
+
+    var projectid = -1;
+    try {
+        projectid = await insertPromise;
+        projectid = projectid.projectid;
+    } catch (error) {
+        console.log('Error inserting project:', error);
+        res.status(500).send({msg: 'Error inserting project'});
+        return; 
+    }
+
+    // Create the project as a product in Stripe
+    const product = await stripe.products.create({
+        name: "project_" + projectid,
+    }, 
+    {stripeAccount: schoolData.data.stripeid});
+
+    // Create the price for the product
+    const price = await stripe.prices.create({
+        currency: 'gbp',
+        custom_unit_amount: {
+          enabled: true,
+        },
+        product: product.id,
+    },
+    {stripeAccount: schoolData.data.stripeid});
+
+    // Update the project with the product id
+    const updatePromise = new Promise((resolve, reject) => {
+        pool.query('UPDATE projects SET stripeproductid = $1, stripepriceid = $2 WHERE projectid = $3', [product.id, price.id, projectid], (error, results) => {
+            if (error) {
+                reject(error);
+            }
+            resolve({msg: "success"});
+        });
+    });
+
+    try {
+        await updatePromise;
+        console.log('Project product created:', projectid);
+
+    }
+    catch (error) {
+        console.log('Error updating project:', error);
+        res.status(500).send({msg: 'Error updating project'});
+        return;
+    }
+
+
+    res.send({msg: "success", projectid: projectid});
 });
 
 
@@ -209,7 +205,7 @@ router.post('/edit/:projectid', async function(req, res) {
     const projectid = req.params.projectid
     const title = req.body.title;
     const description = req.body.description;
-    const goalMoney = req.body.goalMoney;
+    const goalmoney = req.body.goalmoney;
     const status = req.body.status;
 
     // Check the Contributor is a teacher at the school
@@ -221,7 +217,7 @@ router.post('/edit/:projectid', async function(req, res) {
     const school = verif.project.school;
 
     // Update the project in the database
-    pool.query('UPDATE projects SET title = $1, school = $2, description = $3, goalMoney = $4, status = $5 WHERE projectid = $6', [title, school, description, goalMoney, status, projectid], (error, results) => {
+    pool.query('UPDATE projects SET title = $1, school = $2, description = $3, goalmoney = $4, status = $5 WHERE projectid = $6', [title, school, description, goalmoney, status, projectid], (error, results) => {
         if (error) {
             throw error;
         }
@@ -240,6 +236,10 @@ router.post('/delete/:projectid', async function(req, res) {
         return;
     }
 
+    const stripeproductid = verif.project.stripeproductid;
+    // TODO: Delete the product from Stripe
+
+
     // Delete the project from the database
     pool.query('DELETE FROM projects WHERE projectid = $1', [projectid], (error, results) => {
         if (error) {
@@ -250,5 +250,48 @@ router.post('/delete/:projectid', async function(req, res) {
 });
 
 
+// Returns a link to donate
+router.post('/donate/:projectid', async function(req, res){
+    var project = await getProjectData(req.params.projectid);
+    if (project.msg != "Success"){
+        res.status(404).send(project.msg);
+        return;
+    }
+
+    project = project.project;
+    const school = project.school;
+
+    // Check if the school is ready to receive donations
+    const schoolData = await schoolQuery(school);
+    if (schoolData.onboarded !== true){
+        res.status(501).send({msg: 'School not yet onboarded'});
+        return;
+    }
+
+    console.log("PRICE ID: " + project.stripepriceid)
+    const schoolstripeid = schoolData.data.stripeid;
+    const session = await stripe.checkout.sessions.create(
+        {
+          mode: 'payment',
+          line_items: [
+            {
+              price: project.stripepriceid,
+              quantity: 1,
+            },
+          ],
+          success_url: 'https://localhost:3000/',
+          cancel_url: 'https://localhost:3000/projects/view/' + project.projectid,
+          payment_intent_data: {
+            application_fee_amount: 100,
+          },
+        },
+        {
+          stripeAccount: schoolstripeid,
+        }
+      );
+
+    res.send({msg: "success", link: session.url});
+
+});
 
 module.exports = router;

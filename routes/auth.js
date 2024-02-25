@@ -107,7 +107,7 @@ router.get('/action', async function(req, res) {
         console.log("Finished inserting user into database");
       });
 
-      res.send("Email verified, use the forgot password link to set your password.");
+      res.send("Email verified, set your password in the settings page.");
     })
     .catch(error => {
       // Handle the error
