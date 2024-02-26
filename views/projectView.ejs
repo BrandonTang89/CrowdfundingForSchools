@@ -16,8 +16,8 @@
     <p>Status: <%= project.status %></p>
 
     <!-- To Do: Donation Form -->
-    <form id="donationForm">
-      <button type="submit">Donate</button>
+    <form id="donationForm" style="display: none;">
+      <button type="submit" >Donate</button>
     </form>
 
     <br/>
@@ -54,7 +54,6 @@
     }
   checkEligibility();
 
-
   var donationLink = "";
   async function checkDonation(){
     var response = await fetch("/projects/donate/<%= project.projectid %>", {
@@ -62,7 +61,7 @@
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({})
+      body: JSON.stringify(localStorage.getItem('uid') ? {userid: localStorage.getItem('uid')} : {})
     });
 
     var json = await response.json();
@@ -70,9 +69,10 @@
       console.log("Eligible for donation: " + json.msg);
       var donationForm = document.getElementById("donationForm");
       donationForm.action = json.link;
+      donationForm.style.display = 'block';
     }
     else {
-      console.log("Not Eligible for donation: " + responseBody);
+      console.log("Not Eligible for donation: " + json.msg);
       var donationForm = document.getElementById("donationForm");
       donationForm.style.display = 'none';
     }

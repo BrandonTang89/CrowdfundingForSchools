@@ -9,9 +9,11 @@ var indexRouter = require('./routes/index');
 var authRouter = require('./routes/auth');
 var projectsRouter = require('./routes/projects');
 var adminRouter = require('./routes/admin');
+var webhookRouter = require('./routes/webhook');
 
 var app = express();
-app.use(express.json()); 
+app.use('/webhook', express.raw({ type: 'application/json' }));
+app.use(express.json());
 
 // Firebase Admin SDK
 var serviceAccount = require("./env/service.json");
@@ -35,6 +37,7 @@ app.use('/', indexRouter);
 app.use('/auth', authRouter);
 app.use('/projects', projectsRouter);
 app.use('/admin', adminRouter);
+app.use('/webhook', webhookRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

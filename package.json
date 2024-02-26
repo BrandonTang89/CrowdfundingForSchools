@@ -11,7 +11,7 @@
     "debug": "~2.6.9",
     "dotenv": "^16.4.4",
     "ejs": "~2.6.1",
-    "express": "~4.16.1",
+    "express": "^4.18.2",
     "firebase": "^10.8.0",
     "firebase-admin": "^12.0.0",
     "firebaseui": "^6.1.0",

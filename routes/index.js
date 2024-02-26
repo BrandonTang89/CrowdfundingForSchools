@@ -4,19 +4,19 @@ const axios = require('axios');
 const pool = require('../db.js');
 var router = express.Router();
 
-router.get('/', function(req, res) {
+router.get('/', function (req, res) {
   res.render('index', { title: 'Numberfit Crowd-Funding Website' });
 });
 
-router.get('/about', function(req, res) {
+router.get('/about', function (req, res) {
   res.render('about');
 });
 
-router.get('/login', function(req, res) {
+router.get('/login', function (req, res) {
   res.render('login');
 });
 
-router.post('/login', function(req, res) {
+router.post('/login', function (req, res) {
   const authEndPoint = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${process.env.API_KEY}`;
   const requestData = req.body;
 
@@ -34,25 +34,25 @@ router.post('/login', function(req, res) {
     });
 });
 
-router.get('/signup', function(req, res) {
+router.get('/signup', function (req, res) {
   res.render('signup');
 });
 
-router.get('/settings/:firebtoken', async function(req, res) {
-  try{
+router.get('/settings/:firebtoken', async function (req, res) {
+  try {
     var decodedToken = await getAuth().verifyIdToken(req.params.firebtoken);
     var uid = decodedToken.uid;
 
-    try{
+    try {
       var userRecord = await getAuth().getUser(uid)
-      if (userRecord.emailVerified == false){
+      if (userRecord.emailVerified == false) {
         return res.redirect('/auth/verify?firebtoken=' + req.params.firebtoken);
       }
       var email = userRecord.email;
       var displayName = userRecord.displayName;
 
       console.log('User data:', email, displayName);
-      
+
       const getAdminSchools = (userid) => {
         return new Promise((resolve, reject) => {
           pool.query("SELECT * FROM roles WHERE userid = $1", [userid], (error, results) => {
@@ -74,19 +74,19 @@ router.get('/settings/:firebtoken', async function(req, res) {
         return;
       }
 
-      res.render('settings', { uid: decodedToken.uid, email: email, displayName: displayName, adminschools: adminschools});
+      res.render('settings', { uid: decodedToken.uid, email: email, displayName: displayName, adminschools: adminschools });
 
     }
-    catch(error){
+    catch (error) {
       console.log('Error fetching user data:', error);
       res.send('Error fetching user data:', error);
     };
   }
-  catch (e){
+  catch (e) {
     console.log(e)
     res.send('Something went wrong with verifying your token.');
   }
-  
+
 });
 
 module.exports = router;
