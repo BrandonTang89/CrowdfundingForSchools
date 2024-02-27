@@ -1,5 +1,5 @@
-# NumberFitCrowdFunding
-A Crowd Funding Project for Number Fit
+# Crowdfunding for Schools
+A platform for schools to propose projects and receive donations from the public.
 
 ### TO-DO (Easier)
 #### General
@@ -31,7 +31,7 @@ A Crowd Funding Project for Number Fit
 
 #### Administration
 - Method for administrators to promote/demote teachers/administrators within the school settings page (important)
-- Some way for numberfit/us to create the first administrator for a school
+- Some way for us to create the first administrator for a school
 
 #### Payment
 - Minimum donation amount
@@ -53,7 +53,7 @@ Install dependencies:
 `npm install`
 
 Run the app:
-- `DEBUG=numberfitcrowdfunding:* npm start`
+- `DEBUG=crowdfundingforschools:* npm start`
 
 Run the DB: 
 - `sudo dockerd`

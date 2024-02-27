@@ -5,7 +5,7 @@ const pool = require('../db.js');
 var router = express.Router();
 
 router.get('/', function (req, res) {
-  res.render('index', { title: 'Numberfit Crowd-Funding Website' });
+  res.render('index', { title: 'Crowd-Funding for Schools Website' });
 });
 
 router.get('/about', function (req, res) {
