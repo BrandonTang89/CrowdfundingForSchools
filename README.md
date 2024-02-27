@@ -17,7 +17,8 @@ A Crowd Funding Project for Number Fit
 
 #### Database
 - Route for non-contributors to propose a project
-    - This is non-trivial since we probably should not create the corresponding stripe products and prices until the project is approved.
+    - We probably should not create the corresponding stripe products and prices until the project is approved.
+    - Might want to use the presence of a stripe product id as a flag for whether the product has been created.
 - Much better filtering settings when viewing the list of projectss
     - By school, status, etc
 - Better project listings, with sorting and stuff
@@ -37,6 +38,8 @@ A Crowd Funding Project for Number Fit
 - Information about fees for both donors and schools
 - Information for admin users on onboarding
 - Method for user to see list of their donations
+- Email confirmation of donations
+    - Probably easiest done with firebase
 
 ### TO-DO (Hard)
 - Support for subscriptions rather than one-time donations
@@ -95,7 +98,7 @@ Stored in the .env file as `WEBHOOK_SECRET`. Allows the server to verify that po
 This information will be revealed when setting up the stripe listener.
 
 ### Domain
-Note necessarily a secret but an environment variable that is used to specify the domain of the server. Stored in the .env file as `DOMAIN`.
+Not necessarily a secret but an environment variable that is used to specify the domain of the server. Stored in the .env file as `DOMAIN`.
 
 For testing, use
 `DOMAIN=http://localhost:3000`
