@@ -1,52 +1,6 @@
 # Crowdfunding for Schools
 A platform for schools to propose projects and receive donations from the public.
 
-### TO-DO (Easier)
-#### General
-- Do something about the home page and the about page
-
-#### Auth
-- Button with timer to re-send email for email verification
-- Much better dealing with user error:
-    - Email already exists when signing up
-    - Email not found when resetting password
-- Email verification route should be more informative and redirect the user back to the site.
-- The firebase token has an expiry time. We should check for this and either log the user out or use the refresh token to get a new token. (important)
-- Form sections on the settings page to set preferences like schools that the user wants to see.
-    -  If we end up having multiple possible schools then we probably should have a different table for this for the database to be in 1st normal form.
-
-#### Database
-- Route for non-contributors to propose a project
-    - We probably should not create the corresponding stripe products and prices until the project is approved.
-    - Might want to use the presence of a stripe product id as a flag for whether the product has been created.
-- Much better filtering settings when viewing the list of projectss
-    - By school, status, etc
-- Better project listings, with sorting and stuff
-- Documentation for parameters and return type of each route.
-- Change the currentmoney field to be reflected in pence rather than pounds
-- Data validation and additional fields for projects
-    - E.g. class
-- Error handling for many cases
-    - E.g. When a project is created by a school that hasn't onboarded, we prevent the creation of the project
-
-#### Administration
-- Method for administrators to promote/demote teachers/administrators within the school settings page (important)
-- Some way for us to create the first administrator for a school
-
-#### Payment
-- Minimum donation amount
-- Information about fees for both donors and schools
-- Information for admin users on onboarding
-- Method for user to see list of their donations
-- Email confirmation of donations
-    - Probably easiest done with firebase
-
-### TO-DO (Hard)
-- Support for subscriptions rather than one-time donations
-- Support for bank transfer donations that incur less fees
-
-_I'm sure there are many more small things that I have forgotten about, do explore_
-
 # Set-Up
 ## Running the application
 Install dependencies:
