@@ -57,7 +57,7 @@
       var goalmoney = document.getElementById("goalmoney").value;
       var status = document.getElementById("status").value;
 
-      // Post-Request to Create Project
+      // Post-Request to Edit Project
       var response = await fetch("/projects/edit/<%= project.projectid %>", {
         method: "POST",
         headers: {

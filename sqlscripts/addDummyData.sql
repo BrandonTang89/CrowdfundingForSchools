@@ -8,7 +8,7 @@ VALUES ('Project 1', 'School 1', 'Description 1', 100, 0, 1, 'proposed'),
 DO $$
 DECLARE MYUID VARCHAR(255);
 BEGIN
-  MYUID := '0ESpzl9x9DgvoTazaQSjp4nEn8M2';
+  MYUID := 's4WuQLQd2AaJ3g4Alr7nBf6XtU02';
 
   INSERT INTO users (userid, email, default_school) 
   VALUES (MYUID, '-', 'Oxford')
