@@ -1,12 +1,32 @@
 # Database
 We will use PostgreSQL for the database. 
 
+### Installing Docker and PostgreSQL
+You can download Docker here: https://www.docker.com/products/docker-desktop/
+And PostgresSQL here: https://www.enterprisedb.com/downloads/postgres-postgresql-downloads
+- Choose port 5432 when prompted
+- You will be asked for a password which you will need to remember to run the code later
+- At least on Windows, you also need to add PostgreSQL to the PATH environement variable as described here: https://stackoverflow.com/questions/30401460/postgres-psql-not-recognized-as-an-internal-or-external-command
+    - Search for 'Environment variables' in your computer searchbar
+    - Click 'Environment variables', then under 'System variables' double-click 'PATH'
+    - Click 'New', and enter C:\Program Files\PostgreSQL\16\bin or wherever this file is stored, replacing 16 with your PostgreSQL version
+    - Repeat to add C:\Program Files\PostgreSQL\16\lib
+    - Click OK
+    - Restart your terminal/whatever software you're in
+
 ## Database Setup
 We can set up the database locally using Docker.
+**Note:** I needed to be have Docker Desktop open on your computer
+Linux:
 ```
 sudo dockerd
 sudo docker pull postgres
 sudo docker run --name mypostgres -e POSTGRES_PASSWORD=hellohello -d -p 5432:5432 postgres
+```
+Windows:
+```
+docker pull postgres
+docker run --name mypostgres -e POSTGRES_PASSWORD=hellohello -d -p 5432:5432 postgres
 ```
 
 ### Creating Our Database

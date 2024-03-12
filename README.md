@@ -6,15 +6,23 @@ A platform for schools to propose projects and receive donations from the public
 Install dependencies:
 `npm install`
 
-Run the app:
+### Run the app:
+**Note:** before running the app, you will need to follow all of the instructions in **Environment secrets** below, set up the database, and set up the Stripe listener
+Linux:
 - `DEBUG=crowdfundingforschools:* npm start`
+Windows:
+- `SET DEBUG=crowdfundingforschools:*`
+- `npm start`
 
-Run the DB: 
+### Run the DB:
+Linux:
 - `sudo dockerd`
 - `sudo docker start mypostgres`
-- _Information on setting up the database can be found in the `docs/database.md` file._
+Windows:
+- `docker start mypostgres`
+_Information on setting up the database can be found in the `docs/database.md` file._
 
-Run the stripe listener:
+### Run the stripe listener:
 - `stripe listen --forward-to localhost:3000/webhook`
 - _Information on setting up the stripe listener can be found in the `docs/payment.md` file._
 
@@ -32,9 +40,12 @@ Place within the project root in a folder called /env. This location is specifie
 
 `var serviceAccount = require("./env/service.json");`
 
+### .env file
+Create a file called '.env' in the root directory and add all the secrets below in the form SECRET_NAME="SECRET_VALUE".
+Make sure to add this file to gitignore.
 
 ### Firebase Web API Key
-Should be stored in the .env file as `FIREBASE_API_KEY`. 
+Should be stored in the .env file as `API_KEY`. 
 
 This is used to access the Firebase REST API. Can be found by going to the firebase project settings and looking for the `apiKey` in the code snippet shown.
 
