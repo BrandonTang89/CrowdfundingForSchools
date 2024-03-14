@@ -13,7 +13,7 @@ CREATE TABLE Users (
 DROP TABLE IF EXISTS Schools CASCADE;
 CREATE TABLE Schools (
     school VARCHAR(255) PRIMARY KEY,
-    stripeid VARCHAR(255),
+    stripeid VARCHAR(255) DEFAULT null,
     onboarded BOOLEAN DEFAULT FALSE
 );
 

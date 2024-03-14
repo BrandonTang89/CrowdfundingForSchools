@@ -19,6 +19,7 @@
     <form id="donationForm" style="display: none;">
       <button type="submit" >Donate</button>
     </form>
+    <p id="noDonation" style="display: none;">Donation not available</p>
 
     <br/>
     <!-- Button linking to edit page -->
@@ -65,16 +66,18 @@
     });
 
     var json = await response.json();
+    var donationForm = document.getElementById("donationForm");
+    var noDonation = document.getElementById("noDonation")
     if (response.status === 200) {
       console.log("Eligible for donation: " + json.msg);
-      var donationForm = document.getElementById("donationForm");
       donationForm.action = json.link;
       donationForm.style.display = 'block';
+      noDonation.style.display = 'none';
     }
     else {
       console.log("Not Eligible for donation: " + json.msg);
-      var donationForm = document.getElementById("donationForm");
       donationForm.style.display = 'none';
+      noDonation.style.display = 'block';
     }
   }
 

@@ -34,6 +34,7 @@ We can create our database layout using the following commands:
 ```
 psql -h localhost -p 5432 -U postgres -c "CREATE DATABASE crowdfundingsitedb"
 psql -h localhost -p 5432 -U postgres -d crowdfundingsitedb -f sqlscripts/createDatabase.sql
+psql -h localhost -p 5432 -U postgres -d crowdfundingsitedb -f sqlscripts/addDummyData.sql
 ```
 
 ### Quick Docker Commands
@@ -72,7 +73,7 @@ Stores personal user data
 
 ### Schools Table
 - **School** : String, Name of school
-- stripeid: String, Stripe connected account id
+- stripeid: String, Stripe connected account id. Default is null, if they have not set up a Stripe
 - onboarded: Boolean, Whether the school has completed the onboarding process
 
 ### Roles Table

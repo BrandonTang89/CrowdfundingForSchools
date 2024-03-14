@@ -300,43 +300,53 @@ router.post('/donate/:projectid', async function (req, res) {
     const schoolData = await schoolQuery(school);
     const schoolstripeid = schoolData.data.stripeid;
 
-    // Check that the product/price has not been archived
-    const product = await stripe.products.retrieve(project.stripeproductid, { stripeAccount: schoolstripeid });
-    const price = await stripe.prices.retrieve(project.stripepriceid, { stripeAccount: schoolstripeid });
+    // Check that the product/price has not been archived (and that the school stripeid exists)
+    if (schoolstripeid != null) {
+        console.log(schoolstripeid);
+        console.log(schoolstripeid==null);
 
-    if (product.active == false || price.active == false ) {
-        res.status(401).send({ msg: "Product or price has been archived" });
-        return;
-    }
-    if (project.status != 'open') {
-        res.status(401).send({ msg: "Project is not open" });
-        return;
-    }
+        const product = await stripe.products.retrieve(project.stripeproductid, { stripeAccount: schoolstripeid });
+        const price = await stripe.prices.retrieve(project.stripepriceid, { stripeAccount: schoolstripeid });
 
-    console.log("PRICE ID: " + project.stripepriceid)
-    const session = await stripe.checkout.sessions.create(
-        {
-            mode: 'payment',
-            line_items: [
-                {
-                    price: project.stripepriceid,
-                    quantity: 1,
-                },
-            ],
-            success_url: `${process.env.DOMAIN}/projects/success?projectid=${project.projectid}`,
-            cancel_url: `${process.env.DOMAIN}/projects/view/${project.projectid}`,
-            payment_intent_data: {
-                application_fee_amount: 100,
-            },
-
-            client_reference_id: JSON.stringify({ projectid: project.projectid, userid: userid}),
-        },
-        {
-            stripeAccount: schoolstripeid,
+        if (product.active == false || price.active == false ) {
+            res.status(401).send({ msg: "Product or price has been archived" });
+            return;
         }
-    );
+        if (project.status != 'open') {
+            res.status(401).send({ msg: "Project is not open" });
+            return;
+        }
+    
+        console.log("PRICE ID: " + project.stripepriceid)
+        const session = await stripe.checkout.sessions.create(
+            {
+                mode: 'payment',
+                line_items: [
+                    {
+                        price: project.stripepriceid,
+                        quantity: 1,
+                    },
+                ],
+                success_url: `${process.env.DOMAIN}/projects/success?projectid=${project.projectid}`,
+                cancel_url: `${process.env.DOMAIN}/projects/view/${project.projectid}`,
+                payment_intent_data: {
+                    application_fee_amount: 100,
+                },
+    
+                client_reference_id: JSON.stringify({ projectid: project.projectid, userid: userid}),
+            },
+            {
+                stripeAccount: schoolstripeid,
+            }
+        );
+    
+        res.send({ msg: "success", link: session.url });
 
-    res.send({ msg: "success", link: session.url });
+    } else {
+        res.status(400).send({ msg: "No school Stripe ID"})
+    }
+
+    
 
 });
 
