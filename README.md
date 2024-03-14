@@ -7,17 +7,17 @@ Install dependencies:
 `npm install`
 
 ### Run the app:
-**Note:** before running the app, you will need to follow all of the instructions in **Environment secrets** below, set up the database, and set up the Stripe listener
+**Note:** before running the app, you will need to follow all of the instructions in **Environment secrets** below, set up the database, and set up the Stripe listener  
 Linux:
-- `DEBUG=crowdfundingforschools:* npm start`
+- `DEBUG=crowdfundingforschools:* npm start`  
 Windows:
 - `SET DEBUG=crowdfundingforschools:*`
 - `npm start`
 
-### Run the DB:
+### Run the DB:  
 Linux:
 - `sudo dockerd`
-- `sudo docker start mypostgres`
+- `sudo docker start mypostgres`  
 Windows:
 - `docker start mypostgres`
 _Information on setting up the database can be found in the `docs/database.md` file._
