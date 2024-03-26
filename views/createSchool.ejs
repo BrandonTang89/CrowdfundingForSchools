@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Create School</title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+  </head>
+  <body>
+    <%- include('navbar') %>
+
+    <h1>Create a School</h1>
+    <p>This will sign your school up to the service.
+    </p>
+
+    <form id="createSchoolForm">
+      <label for="name">School name:</label>
+      <br />
+      <input type="text" id="name" name="name" />
+      <br />
+
+      <br />
+      <button type="submit" id="submit">Create School</button>
+      <p id="loading" style="display: none;">Loading...<br>You will be redirected to the Stripe onboarding page shortly</p>
+      <p id="errorText"></p>
+    </form>
+
+  </body>
+  <script>
+
+    var form = document.getElementById("createSchoolForm");
+    var submitButton = document.getElementById("submit");
+    var loading = document.getElementById("loading");
+    var errorText = document.getElementById("errorText");
+
+    async function sendCreateSchool(event) {
+      submitButton.style.display = 'none';
+      loading.style.display = 'block';
+      errorText.innerHTML = '';
+
+      event.preventDefault();
+      var name = document.getElementById("name").value;
+      console.log(name)
+
+      // Post-Request to Create Project
+      var response = await fetch("/admin/?school="+name+"&firebtoken="+localStorage.getItem("firebtoken"), {
+        method: "GET",
+        headers: {
+          'Content-Type': 'application/json'
+        },
+      });
+
+      var json = await response.json();
+      if (response.status == 200) {
+        window.open(json.onboardinglink);
+        location.reload();
+      } else {
+        console.log(response.status);
+        loading.style.display = 'none';
+        if (response.status == 403) {
+        errorText.innerHTML = "This school already exists, and you are not an admin";
+        } else {
+          errorText.innerHTML = json.msg;
+        }
+      }
+    }
+
+    form.addEventListener("submit", sendCreateSchool);
+  </script>  
+</html>

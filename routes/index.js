@@ -89,4 +89,8 @@ router.get('/settings/:firebtoken', async function (req, res) {
 
 });
 
+router.get('/createSchool', function (req, res) {
+  res.render('createSchool');
+});
+
 module.exports = router;
