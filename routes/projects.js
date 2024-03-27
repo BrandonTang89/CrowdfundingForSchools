@@ -15,13 +15,17 @@ router.get('/', function (req, res) {
 router.post('/', function (req, res) {
     console.log(req.body);
     const searchQuery = req.body.searchQuery;
-
+    var schoolQueryPart = "";
+    if (req.body.school) {
+        schoolQueryPart = " AND school = '" + req.body.school.replace("'", "''") + "'";
+    }
+    var queryText = "SELECT * FROM projects WHERE title ILIKE $1" + schoolQueryPart
     // Query the database
-    pool.query('SELECT * FROM projects WHERE title ILIKE $1', ['%' + searchQuery + '%'], (error, results) => {
+    pool.query(queryText, ['%' + searchQuery + '%'], (error, results) => {
         if (error) {
             throw error;
         }
-        // console.log(results.rows);    
+        // console.log(results.rows);  
         res.send({ projects: results.rows });
     });
 
@@ -44,7 +48,7 @@ router.get('/create', async function (req, res) {
     const user = await verifyUser(firebtoken);
     if (user.status == 401) {
         res.status(401).send('Please log in to create a project');
-        return;
+            return;
     }
 
     console.log("User loading project creation form: ", user);

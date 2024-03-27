@@ -72,7 +72,7 @@
         console.log("Success Create Project");
         window.location.href = "/projects/view/" + json.projectid;
       } else {
-        alert("Tried but failed to create project");
+        alert("Tried but failed to create project:", json.msg);
       }
     }
 

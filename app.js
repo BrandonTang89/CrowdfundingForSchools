@@ -8,6 +8,7 @@ require('dotenv').config();
 var indexRouter = require('./routes/index');
 var authRouter = require('./routes/auth');
 var projectsRouter = require('./routes/projects');
+var schoolsRouter = require('./routes/schools');
 var adminRouter = require('./routes/admin');
 var webhookRouter = require('./routes/webhook');
 
@@ -36,6 +37,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/auth', authRouter);
 app.use('/projects', projectsRouter);
+app.use('/schools', schoolsRouter)
 app.use('/admin', adminRouter);
 app.use('/webhook', webhookRouter);
 

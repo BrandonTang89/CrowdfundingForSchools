@@ -7,7 +7,7 @@
   <body>
     <%- include('navbar') %>
 
-    <h1>Projects to Crowdfund</h1>
+    <h1 id="title">Projects to Crowdfund</h1>
     <a id="proposeLink">Propose a project</a>
 
     <h2>List of Projects</h2>
@@ -23,12 +23,23 @@
     </ol>
   </body>
   <script>
+    const queryString = window.location.search;
+    console.log(queryString)
+    const urlParams = new URLSearchParams(queryString);
+    var school = null;
+    if (urlParams.has('school')) {
+      school = urlParams.get('school');
+      var title = document.getElementById("title");
+      title.innerHTML += " - " + school;
+    }
+
     var form = document.getElementById("filterForm");
     var projectList = document.getElementById("projectList");
 
     async function sendFilter(event) {
       event.preventDefault();
       var searchQuery = document.getElementById("searchQuery").value;
+
 
       // Post-Request to Filter Projects
       var response = await fetch("/projects", {
@@ -37,7 +48,8 @@
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          searchQuery: searchQuery
+          searchQuery: searchQuery,
+          school: school
         })
       });
 

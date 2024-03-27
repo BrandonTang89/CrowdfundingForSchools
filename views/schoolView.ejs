@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= school.school %> </title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+  </head>
+  <body>
+    <%- include('navbar') %>
+
+    <!-- Descriptions of the project -->
+    <h1><%= school.school %></h1>
+    <p><a id="projectsLink" href="/projects/?school=<%- school.school %>">Projects</a></p>
+
+    <br/>
+    <!-- Button linking to admin page -->
+    <a id="editSchoolButton" style="display: none;">Admin</a>
+  </body>
+
+  <script>
+  </script>
+  
+</html>

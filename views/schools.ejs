@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Schools</title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+  </head>
+  <body>
+    <%- include('navbar') %>
+
+    <h2>List of Schools</h2>
+    <form id="filterForm">
+      <label for="filter">Search:</label>
+      <input type="text" id="searchQuery" name="searchQuery" />
+      <button type="submit">Filter</button>
+    </form>
+
+    <ol id="schoolList">
+
+    </ol>
+  </body>
+  <script>
+    var form = document.getElementById("filterForm");
+    var schoolList = document.getElementById("schoolList");
+
+    async function sendFilter(event) {
+      event.preventDefault();
+      var searchQuery = document.getElementById("searchQuery").value;
+
+      // Post-Request to Filter Projects
+      var response = await fetch("/schools", {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          searchQuery: searchQuery
+        })
+      });
+
+      var json = await response.json();
+      console.log(json);
+
+      if (response.status == 200) {
+        console.log("Success Filter");
+        schoolList.innerHTML = ""; // Clear existing school list
+
+        // TODO: More advanced school list such as school, status, etc.
+        json.schools.forEach(function(school) {
+          var li = document.createElement("li");
+          var link = document.createElement("a");
+          link.href = "/schools/view/" + school.school;
+          link.text = school.school;
+          li.appendChild(link);
+          schoolList.appendChild(li);
+        });
+      } else {
+        alert("Tried but failed to get schools");
+      }
+    }
+
+    form.addEventListener('submit', sendFilter);
+
+    // Initial Load
+    sendFilter(new Event('submit'));
+
+  </script>
+  
+</html>
