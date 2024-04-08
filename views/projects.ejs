@@ -16,6 +16,19 @@
       <label for="filter">Search:</label>
       <input type="text" id="searchQuery" name="searchQuery" />
       <button type="submit">Filter</button>
+      <br>
+      <label for="status">Status:</label>
+      <select name="status" id="status">
+        <option value="open">Open</option>
+        <option value="closed">Closed</option>
+        <option value="proposed">Proposed</option>
+        <option value="any">Any</option>
+      </select>
+      
+      <label for="schools" id="schoolslabel">From schools:</label>
+      <select name="schools" id="schools">
+        <option value="any">Any</option>
+      </select>
     </form>
 
     <ol id="projectList">
@@ -26,11 +39,24 @@
     const queryString = window.location.search;
     console.log(queryString)
     const urlParams = new URLSearchParams(queryString);
-    var school = null;
+    var school = "any";
+    var schoolslabel = document.getElementById("schoolslabel");
+    var schools = document.getElementById("schools");
     if (urlParams.has('school')) {
       school = urlParams.get('school');
       var title = document.getElementById("title");
       title.innerHTML += " - " + school;
+      schoolslabel.hidden = "hidden";
+      schools.hidden = "hidden"
+    } else {
+      if (localStorage.getItem('firebtoken')) {
+        //Get user's favourite schools
+        //Add them to the dropdown box
+        //Could also add an 'all favourites' option
+      } else {
+        schoolslabel.hidden = "hidden";
+        schools.hidden = "hidden"
+      }
     }
 
     var form = document.getElementById("filterForm");
@@ -39,8 +65,10 @@
     async function sendFilter(event) {
       event.preventDefault();
       var searchQuery = document.getElementById("searchQuery").value;
-
-
+      if (school == "any") {
+        school = schools.value
+      }
+      var status = document.getElementById("status").value;
       // Post-Request to Filter Projects
       var response = await fetch("/projects", {
         method: "POST",
@@ -49,7 +77,8 @@
         },
         body: JSON.stringify({
           searchQuery: searchQuery,
-          school: school
+          school: school,
+          status: status
         })
       });
 

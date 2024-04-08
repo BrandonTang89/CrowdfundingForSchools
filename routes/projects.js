@@ -16,10 +16,15 @@ router.post('/', function (req, res) {
     console.log(req.body);
     const searchQuery = req.body.searchQuery;
     var schoolQueryPart = "";
-    if (req.body.school) {
+    if (req.body.school != 'any') {
         schoolQueryPart = " AND school = '" + req.body.school.replace("'", "''") + "'";
     }
-    var queryText = "SELECT * FROM projects WHERE title ILIKE $1" + schoolQueryPart
+    var statusQueryPart = "";
+    if (req.body.status != 'any') {
+        statusQueryPart = " AND status = '" + req.body.status + "'"
+    }
+    var queryText = "SELECT * FROM projects WHERE title ILIKE $1" + schoolQueryPart + statusQueryPart
+    console.log(queryText)
     // Query the database
     pool.query(queryText, ['%' + searchQuery + '%'], (error, results) => {
         if (error) {

@@ -10,7 +10,7 @@
     <!-- Descriptions of the project -->
     <h1><%= project.title %></h1>
     <p><%= project.description %></p>
-    <p>School: <%= project.school %></p>
+    <p>School: <a href="/schools/view/<%= project.school %>"><%= project.school %></a></p>
     <p>Goal: £<%= project.goalmoney %></p>
     <p>Current: £<%= project.currentmoney %></p>
     <p>Status: <%= project.status %></p>
