@@ -1,7 +1,7 @@
 -- psql -h localhost -p 5432 -U postgres -d crowdfundingsitedb -f sqlscripts/createDatabase.sql
 -- CREATE DATABASE crowdfundingsitedb;
 CREATE TYPE statustype AS ENUM ('proposed', 'open', 'closed');
-CREATE TYPE roletype AS ENUM ('admin', 'teacher');
+CREATE TYPE roletype AS ENUM ('admin', 'teacher', 'favourite');
 
 DROP TABLE IF EXISTS Users CASCADE;
 CREATE TABLE Users (

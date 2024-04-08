@@ -77,11 +77,11 @@ Stores personal user data
 - onboarded: Boolean, Whether the school has completed the onboarding process
 
 ### Roles Table
-Stores the roles of administrators and teachers for each school. Administrators can promote and demote teachers/other administrators for a school. Teachers (and administrators) can propose, approve, modify, open/close and delete projects for their school.
+Stores the roles of administrators and teachers for each school as well as users who have favourited a school. Administrators can promote and demote teachers/other administrators for a school. Teachers (and administrators) can propose, approve, modify, open/close and delete projects for their school. Favouriters have no admin rights to a school.
 
 - **userid** : String, Firebase Auth UID
 - **school** : String, Name of school
-- role : Enum("admin", "teacher")
+- role : Enum("admin", "teacher", "favourite")
 
 ### Projects Table
 Stores the projects that are to be funded

@@ -1,22 +1,99 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title><%= school.school %> </title>
+    <title id="title"><%= school.school %></title>
     <link rel='stylesheet' href='/stylesheets/style.css' />
   </head>
   <body>
     <%- include('navbar') %>
 
-    <!-- Descriptions of the project -->
     <h1><%= school.school %></h1>
     <p><a id="projectsLink" href="/projects/?school=<%- school.school %>">Projects</a></p>
 
     <br/>
     <!-- Button linking to admin page -->
     <a id="editSchoolButton" style="display: none;">Admin</a>
+
+    <br>
+    <button type="button" id="favourite" disabled="disabled" hidden="hidden">Make favourite</button>
   </body>
 
   <script>
+    var isfavourite = false;
+    const favouriteButton = document.getElementById("favourite");
+
+    async function checkFavourite() {
+      var response = await fetch("/admin/isrole", {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            firebtoken: firebtoken,
+            school: "<%= school.school %>",
+            role: 'favourite'
+          })
+      });
+      var json = await response.json();
+      if (response.status == 200) {
+        if (json.isrole) {
+          favouriteButton.innerHTML = "Remove favourite";
+          isfavourite = true;
+        } else {
+          favouriteButton.innerHTML = "Make favourite";
+          isfavourite = false;
+        }
+        favouriteButton.removeAttribute("hidden");
+        favouriteButton.removeAttribute("disabled");
+      } else {
+        alert("Error retrieving data");
+      }
+    }
+
+    var firebtoken = localStorage.getItem('firebtoken');
+    if (firebtoken) {
+      checkFavourite();
+    } else {
+      favouriteButton.hidden = "hidden";
+    }
+    favouriteButton.addEventListener("click", async function() {
+      favouriteButton.disabled = "disabled";
+      var firebtoken = localStorage.getItem('firebtoken');
+      if (firebtoken) {
+        const title = document.getElementById("title");
+        var school = title.innerHTML
+        var action
+        if (isfavourite) {action = "remove"} else {action = "add"}
+        var response = await fetch("/admin/"+action, {
+          method: "POST",
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            firebtoken: firebtoken,
+            school: "<%= school.school %>",
+            role: 'favourite'
+          })
+        });
+        var json = await response.json();
+        if (response.status == 200) {
+          console.log("Done", action, "favourite");
+          isfavourite = !isfavourite;
+          if (isfavourite) {
+            favouriteButton.innerHTML = "Remove favourite";
+          } else {
+            favouriteButton.innerHTML = "Make favourite";
+          }
+        } else {
+          alert("Failed to", action, "favourite");
+          console.log(json);
+        }
+        favouriteButton.removeAttribute("disabled");
+      } else {
+        favouriteButton.hidden = "hidden";
+        favouriteButton.disabled = "disabled";
+      }
+    });
   </script>
   
 </html>

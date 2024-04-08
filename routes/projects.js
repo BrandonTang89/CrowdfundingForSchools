@@ -24,7 +24,6 @@ router.post('/', function (req, res) {
         statusQueryPart = " AND status = '" + req.body.status + "'"
     }
     var queryText = "SELECT * FROM projects WHERE title ILIKE $1" + schoolQueryPart + statusQueryPart
-    console.log(queryText)
     // Query the database
     pool.query(queryText, ['%' + searchQuery + '%'], (error, results) => {
         if (error) {

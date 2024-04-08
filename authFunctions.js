@@ -16,7 +16,7 @@ async function verifyUser(firebtoken) {
         var emailVerified = userRecord.emailVerified;
 
         if (emailVerified == false) {
-            return { status: 401 };
+            return { status: 401, msg: "Email not verified" };
         }
 
         return { email: email, userid: uid, msg: "Success" };
@@ -43,7 +43,7 @@ async function isContributorAt(firebtoken, school) {
 
     try {
         const isContributorPromise = new Promise((resolve, reject) => {
-            pool.query("SELECT * FROM roles WHERE userid = $1 AND school = $2", [userid, school], (error, results) => {
+            pool.query("SELECT * FROM roles WHERE userid = $1 AND school = $2 AND (role = 'admin' OR role = 'teacher')", [userid, school], (error, results) => {
                 if (error) {
                     reject({ iscontributor: false, msg: "Query error (bad)" });
                 }

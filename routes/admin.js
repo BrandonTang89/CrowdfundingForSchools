@@ -120,5 +120,113 @@ router.get('/', async function (req, res) {
     res.render('admin', { schooldata: schoolData, school: school });
 });
 
+//Adds a role
+//req.body is {firebtoken, school, role}
+router.post('/add', async function (req, res) {
+    var verif = await verifyUser(req.body.firebtoken);
+    if (verif.userid) {
+        const userid = verif.userid
+        const addRolePromise = new Promise((resolve, reject) => {
+            pool.query("INSERT INTO roles (userid, school, role) VALUES ($1, $2, $3)", [userid, req.body.school, req.body.role], (error, results) => {
+                if (error) {
+                    reject(error);
+                }
+                resolve(results);
+            });
+        })
+        addRolePromise.catch((err) => {
+            console.log("Error adding role");
+            console.log(err);
+            res.status(401).send({msg: 'Error adding role'})
+        })
+        res.status(200).send({msg: 'Role added'});
+    } else {
+        res.status(401).send({msg: verif.msg})
+    }
+    
+});
+
+//Removes a role
+//req.body is {firebtoken, school, role}
+router.post('/remove', async function (req, res) {
+    var verif = await verifyUser(req.body.firebtoken);
+    if (verif.userid) {
+        const userid = verif.userid
+        const removeRolePromise = new Promise((resolve, reject) => {
+            pool.query("DELETE FROM roles WHERE userid = $1 AND school = $2 AND role = $3", [userid, req.body.school, req.body.role], (error, results) => {
+                if (error) {
+                    reject(error);
+                }
+                resolve(results);
+            });
+        })
+        removeRolePromise.catch((err) => {
+            console.log("Error deleting role");
+            console.log(err);
+            res.status(401).send({msg: 'Error deleting role'})
+        })
+        res.status(200).send({msg: 'Role deleted'});
+    } else {
+        res.status(401).send({msg: verif.msg})
+    }
+    
+});
+
+//Checks if a role exists
+//req.body is {firebtoken, school, role}
+router.post('/isrole', async function (req, res) {
+    var verif = await verifyUser(req.body.firebtoken);
+    if (verif.userid) {
+        const userid = verif.userid;
+        var queryText = "SELECT * FROM roles WHERE userid = $1 AND school = $2 AND role = $3";
+        const isRolePromise = new Promise((resolve, reject) => {
+            pool.query(queryText, [userid, req.body.school, req.body.role], (error, results) => {
+                if (error) {
+                    reject(error);
+                }
+                resolve(results);
+            });
+        })
+        isRolePromise.then((value) => {
+            if (value.rows.length) {
+                res.status(200).send({isrole: true, msg: "Got role status"});
+            } else {
+                res.status(200).send({isrole: false, msg: "Got role status"});
+            }
+        }).catch((err) => {
+            console.log(err);
+            res.status(401).send({msg: "Error retrieving from database"})
+        });
+    } else {
+        res.status(401).send({msg: verif.msg})
+    }
+})
+
+//Lists the schools in which the given user has the given role
+//req.body is {firebtoken, role}
+router.post('/schoolswhere', async function (req, res) {
+    var verif = await verifyUser(req.body.firebtoken);
+    if (verif.userid) {
+        const userid = verif.userid;
+        var queryText = "SELECT * FROM roles WHERE userid = $1 AND role = $2";
+        const schoolsPromise = new Promise((resolve, reject) => {
+            pool.query(queryText, [userid, req.body.role], (error, results) => {
+                if (error) {
+                    reject(error);
+                }
+                resolve(results);
+            });
+        })
+        schoolsPromise.then((value) => {
+            res.status(200).send({rows: value.rows});
+        }).catch((err) => {
+            console.log(err);
+            res.status(401).send({msg: "Error retrieving from database"})
+        });
+    } else {
+        res.status(401).send({msg: verif.msg})
+    }
+})
+
 
 module.exports = router;

@@ -37,7 +37,6 @@
   </body>
   <script>
     const queryString = window.location.search;
-    console.log(queryString)
     const urlParams = new URLSearchParams(queryString);
     var school = "any";
     var schoolslabel = document.getElementById("schoolslabel");
@@ -50,9 +49,7 @@
       schools.hidden = "hidden"
     } else {
       if (localStorage.getItem('firebtoken')) {
-        //Get user's favourite schools
-        //Add them to the dropdown box
-        //Could also add an 'all favourites' option
+        addFavourites(localStorage.getItem('firebtoken'));
       } else {
         schoolslabel.hidden = "hidden";
         schools.hidden = "hidden"
@@ -83,7 +80,6 @@
       });
 
       var json = await response.json();
-      console.log(json);
 
       if (response.status == 200) {
         console.log("Success Filter");
@@ -100,6 +96,28 @@
         });
       } else {
         alert("Tried but failed to get projects");
+      }
+    }
+
+    async function addFavourites(firebtoken) {
+      var response = await fetch("/admin/schoolswhere", {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            firebtoken: firebtoken,
+            role: 'favourite'
+          })
+      });
+      var json = await response.json();
+      if (response.status == 200) {
+        var schoolsarray = json.rows;
+        schoolsarray.forEach(row => {
+          schools.innerHTML += "<option value='" + row.school + "'>" + row.school + "</option>"
+        })
+      } else {
+        alert("Error retrieving data");
       }
     }
 
