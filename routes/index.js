@@ -55,7 +55,7 @@ router.get('/settings/:firebtoken', async function (req, res) {
 
       const getAdminSchools = (userid) => {
         return new Promise((resolve, reject) => {
-          pool.query("SELECT * FROM roles WHERE userid = $1", [userid], (error, results) => {
+          pool.query("SELECT * FROM roles WHERE userid = $1 AND (role = 'admin' OR role = 'teacher')", [userid], (error, results) => {
             if (error) {
               reject(error);
             }
@@ -92,5 +92,9 @@ router.get('/settings/:firebtoken', async function (req, res) {
 router.get('/createSchool', function (req, res) {
   res.render('createSchool');
 });
+
+router.get('/mySchools', function (req, res) {
+  res.render('mySchools');
+})
 
 module.exports = router;

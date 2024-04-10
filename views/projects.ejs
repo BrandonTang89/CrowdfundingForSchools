@@ -11,7 +11,6 @@
     <a id="proposeLink">Propose a project</a>
 
     <h2>List of Projects</h2>
-    <!-- TODO: Filtering Form, defaults to open projects, default school if logged in -->
     <form id="filterForm">
       <label for="filter">Search:</label>
       <input type="text" id="searchQuery" name="searchQuery" />
@@ -85,7 +84,6 @@
         console.log("Success Filter");
         projectList.innerHTML = ""; // Clear existing project list
 
-        // TODO: More advanced project list such as school, status, etc.
         json.projects.forEach(function(project) {
           var li = document.createElement("li");
           var link = document.createElement("a");

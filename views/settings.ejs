@@ -133,7 +133,16 @@
     async function sendAdminForm(event){
         event.preventDefault();
         var school = document.getElementById("schoolField").value;
-        window.location.href = "/admin/?school=" + encodeURIComponent(school) + "&firebtoken=" + localStorage.getItem("firebtoken")
+        var response = await fetch("/admin/?school="+encodeURIComponent(school)+"&firebtoken="+localStorage.getItem('firebtoken'), {
+            method: "GET",
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        var json = await response.json();
+        if (response.status == 200) {
+            window.location.href = json.onboardinglink;
+        }
     }
     adminForm.addEventListener('submit', sendAdminForm);
   </script>

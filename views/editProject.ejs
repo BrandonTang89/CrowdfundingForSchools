@@ -50,7 +50,7 @@
   </body>
   <script>
     var form = document.getElementById("editProjectForm");
-    async function sendCreateProject(event) {
+    async function sendEditProject(event) {
       event.preventDefault();
       var title = document.getElementById("title").value;
       var description = document.getElementById("description").value;
@@ -83,7 +83,7 @@
         console.log(json.msg);
       }
     }
-    form.addEventListener("submit", sendCreateProject);
+    form.addEventListener("submit", sendEditProject);
 
     var deleteForm = document.getElementById("deleteProjectForm");
     async function sendDeleteProject(event) {

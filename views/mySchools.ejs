@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>My schools</title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+  </head>
+  <body>
+    <%- include('navbar') %>
+
+    <h1 id="title">My schools:</h1>
+
+    <h2 id="favouriteTitle" hidden="hidden">Favourites:</h1>
+    <ol id="favouriteList" hidden="hidden"></ol>
+
+    <h2 id="teacherTitle" hidden="hidden">Teaching roles:</h1>
+    <ol id="teacherList" hidden="hidden"></ol>
+
+    <h2 id="adminTitle" hidden="hidden">Admin roles:</h1>
+    <ol id="adminList" hidden="hidden"></ol>
+  </body>
+  <script>
+    if (localStorage.getItem('firebtoken')) {
+      var types = ["favourite", "teacher", "admin"]
+      types.forEach(function (type) {
+        findSchools(localStorage.getItem('firebtoken'), type);
+      });
+    } else {
+      window.location.href = "/login";
+    }
+
+    async function sendManage(school){
+      var response = await fetch("/admin/?school="+encodeURIComponent(school)+"&firebtoken="+localStorage.getItem('firebtoken'), {
+          method: "GET",
+          headers: {
+              'Content-Type': 'application/json'
+          }
+      });
+      var json = await response.json();
+      if (response.status == 200) {
+        if (json.onboardinglink) {
+          window.location.href = json.onboardinglink;
+        } else if (json.schooldata) {
+          console.log(json); 
+          //window.location.href = "/admin";
+        }
+      } else {
+        console.log(response.status);
+        console.log(json);
+      }
+    }
+
+    async function findSchools(firebtoken, type) {
+      var elem = document.getElementById(type+"List");
+      var title = document.getElementById(type+"Title");
+      // Post-Request to find schools
+      var response = await fetch("/admin/schoolswhere", {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          firebtoken: firebtoken,
+          role: type
+        })
+      });
+
+      var json = await response.json();
+
+      if (response.status == 200) {
+        elem.innerHTML = ""; // Clear existing school list
+        if (json.rows.length == 0) {
+          elem.hidden = "hidden";
+          title.hidden = "hidden";
+        } else {
+          elem.removeAttribute("hidden");
+          title.removeAttribute("hidden");
+          json.rows.forEach(function(row) {
+            var li = document.createElement("li");
+            var link = document.createElement("a");
+            link.href = "/schools/view/" + row.school;
+            link.text = row.school;
+            li.appendChild(link);
+            if (type == 'admin') {
+              var managelink = document.createElement("button");
+              managelink.innerHTML = "Manage";
+              managelink.style = "margin-left: 20px;";
+              managelink.addEventListener("click", function() {
+                managelink.disabled = "disabled";
+                sendManage(row.school);
+              });
+              li.appendChild(managelink)
+            } else if (type == 'teacher') {
+              //Maybe add ability to leave a school
+            }
+            elem.appendChild(li);
+          });
+        }
+      } else {
+        alert("Tried but failed to get projects");
+      }
+    }
+  </script>
+  
+</html>

@@ -86,7 +86,7 @@ router.get('/', async function (req, res) {
             const accountLink = await stripe.accountLinks.create({
                 account: account.id,
                 refresh_url: `${process.env.DOMAIN}/admin/?school=${encodeURIComponent(school)}&firebtoken=${firebtoken}`,
-                return_url: `${process.env.DOMAIN}/settings/${firebtoken}`,
+                return_url: `${process.env.DOMAIN}/myschools`,
                 type: 'account_onboarding',
             });
 
@@ -117,7 +117,13 @@ router.get('/', async function (req, res) {
         }
     }
     console.log("redirecting");
-    res.render('admin', { schooldata: schoolData, school: school });
+    //res.status(200).send({schooldata: schoolData});
+    try {
+        res.render('admin', {schooldata: schoolData});
+    } catch (err) {
+        console.log(err);
+    }
+    console.log("redirected");
 });
 
 //Adds a role
@@ -200,10 +206,11 @@ router.post('/isrole', async function (req, res) {
     } else {
         res.status(401).send({msg: verif.msg})
     }
-})
+});
 
 //Lists the schools in which the given user has the given role
 //req.body is {firebtoken, role}
+//returns {rows}. For each row in rows, row.school is the school name.
 router.post('/schoolswhere', async function (req, res) {
     var verif = await verifyUser(req.body.firebtoken);
     if (verif.userid) {
@@ -226,7 +233,8 @@ router.post('/schoolswhere', async function (req, res) {
     } else {
         res.status(401).send({msg: verif.msg})
     }
-})
+});
+
 
 
 module.exports = router;
