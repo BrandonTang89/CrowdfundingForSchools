@@ -303,6 +303,32 @@ router.post('/isuser', async function (req, res) {
     });
 });
 
+//Checks if a user has any admin roles
+//req.body is {firebtoken}
+//returns {hasadmin=true/false}
+router.post('/hasadmin', async function (req, res) {
+    var verif = await verifyUser(req.body.firebtoken);
+    if (verif.userid) {
+        var queryText = "SELECT * FROM roles WHERE userid = $1";
+        const rolesPromise = new Promise((resolve, reject) => {
+            pool.query(queryText, [verif.userid], (error, results) => {
+                if (error) {
+                    reject(error);
+                }
+                resolve(results);
+            });
+        })
+        rolesPromise.then((value) => {
+            res.status(200).send({hasadmin: value.rows.length>0});
+        }).catch((err) => {
+            console.log(err);
+            res.status(401).send({msg: "Error retrieving from database"})
+        });
+    } else {
+        res.status(401).send({msg: verif.msg})
+    }
+});
+
 
 
 module.exports = router;

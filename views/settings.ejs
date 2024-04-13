@@ -84,30 +84,49 @@
             return
         }
 
-        
-        // Post Request to /auth/deleteaccount
-        var response = await fetch("/auth/deleteaccount", {
+        //Check if user has any admin priveleges
+        var response2 = await fetch("/admin/hasadmin", {
             method: "POST",
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                idToken: localStorage.getItem("firebtoken"),
+                firebtoken: localStorage.getItem("firebtoken"),
             })
         })
+        var json2 = await response2.json()
+        if (response2.status == 200) {
+            if (json2.hasadmin) {
+                alert("You cannot delete your account because you still have admin priveleges at a school, please remove these first");
+            } else {
+                // Post Request to /auth/deleteaccount
+                var response = await fetch("/auth/deleteaccount", {
+                    method: "POST",
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        idToken: localStorage.getItem("firebtoken"),
+                    })
+                })
 
-        var json = await response.json()
-        console.log(json)
-        if (response.status == 200){
-            console.log("Success Delete Account")
-            localStorage.removeItem("firebtoken")
-            localStorage.removeItem("uid")
-            alert("Account Deleted Successfully")
-            window.location.href = "/"
+                var json = await response.json()
+                console.log(json)
+                if (response.status == 200){
+                    console.log("Success Delete Account")
+                    localStorage.removeItem("firebtoken")
+                    localStorage.removeItem("uid")
+                    alert("Account Deleted Successfully")
+                    window.location.href = "/"
+                }
+                else{
+                    alert("Tried but failed to delete account")
+                }
+            }
+        } else {
+            alert("Error connecting");
         }
-        else{
-            alert("Tried but failed to delete account")
-        }
+
     }
     deleteAccountForm.addEventListener('submit', sendDeleteAccount);
   </script>
