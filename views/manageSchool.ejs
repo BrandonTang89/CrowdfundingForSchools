@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>School Management</title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+  </head>
+  <body>
+    <%- include('navbar') %>
+    <h1>School Profile Administration</h1>
+    <p id="schoolname">School: </p>
+    <p id="onboardstatus">Onboard Status: </p>
+  </body>
+
+  <script>
+    const school = localStorage.getItem('school');
+    const onboarded = localStorage.getItem('onboarded');
+    if (school) {
+      document.getElementById('schoolname').innerHTML += school;
+      document.getElementById('onboardstatus').innerHTML += onboarded;
+    } else {
+      window.location.href = "/myschools";
+    }
+  </script>
+  
+</html>

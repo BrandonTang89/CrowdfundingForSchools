@@ -40,8 +40,10 @@
         if (json.onboardinglink) {
           window.location.href = json.onboardinglink;
         } else if (json.schooldata) {
-          console.log(json); 
-          //window.location.href = "/admin";
+          console.log(json);
+          localStorage.setItem('school', json.schooldata.school);
+          localStorage.setItem('onboarded', json.schooldata.onboarded);
+          window.location.href = "/manageSchool";
         }
       } else {
         console.log(response.status);

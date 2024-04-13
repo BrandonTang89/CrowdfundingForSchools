@@ -67,7 +67,7 @@ router.get('/settings/:firebtoken', async function (req, res) {
 
       var adminschools = {};
       try {
-        adminschools = await getAdminSchools(uid);
+        adminschools = {};//await getAdminSchools(uid);
       } catch (error) {
         console.log('Error fetching admin schools:', error);
         res.status(401).send(error);
@@ -95,6 +95,10 @@ router.get('/createSchool', function (req, res) {
 
 router.get('/mySchools', function (req, res) {
   res.render('mySchools');
+})
+
+router.get('/manageSchool', function (req, res) {
+  res.render('manageSchool');
 })
 
 module.exports = router;

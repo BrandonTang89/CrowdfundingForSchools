@@ -30,20 +30,6 @@
         <input type="text" id="confirmEmailField" name="confirmEmailField"><br>
         <button type="submit">Delete Account</button>
     </form>
-
-    <div id="adminDiv">
-        <h2>Admin Settings</h2>
-        <form id="adminForm">
-            <label for="school">Select School</label><br>
-            <select id="schoolField" name="schoolField">
-            <% adminschools.forEach(function(school) { %>
-                <option value="<%= school %>"><%= school %></option>
-            <% }) %>            
-            </select><br>
-
-            <button type="submit">Manage School</button>
-        </form>
-    </div>
 </body>
   <script>
     var form = document.getElementById("changePassForm");
@@ -124,26 +110,5 @@
         }
     }
     deleteAccountForm.addEventListener('submit', sendDeleteAccount);
-
-    if ('<%= adminschools.length %>' == '0'){
-        document.getElementById("adminDiv").style.display = "none"
-    }
-
-    var adminForm = document.getElementById("adminForm");
-    async function sendAdminForm(event){
-        event.preventDefault();
-        var school = document.getElementById("schoolField").value;
-        var response = await fetch("/admin/?school="+encodeURIComponent(school)+"&firebtoken="+localStorage.getItem('firebtoken'), {
-            method: "GET",
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-        var json = await response.json();
-        if (response.status == 200) {
-            window.location.href = json.onboardinglink;
-        }
-    }
-    adminForm.addEventListener('submit', sendAdminForm);
   </script>
 </html>

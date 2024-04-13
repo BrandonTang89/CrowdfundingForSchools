@@ -117,13 +117,16 @@ router.get('/', async function (req, res) {
         }
     }
     console.log("redirecting");
-    //res.status(200).send({schooldata: schoolData});
-    try {
-        res.render('admin', {schooldata: schoolData});
+    //Note: ideally here we should render the manageSchool page with locals
+    //This wasn't working and after a long time debugging I have no idea why
+    //So I used a workaround by sending the data back to mySchools.ejs, and rendering from there, with the data stored in localstorage
+    res.status(200).send({schooldata: schoolData});
+    /*try {
+        res.render('manageSchool', {school: "hi", onboarded: true});
     } catch (err) {
         console.log(err);
     }
-    console.log("redirected");
+    console.log("redirected");*/
 });
 
 //Adds a role
