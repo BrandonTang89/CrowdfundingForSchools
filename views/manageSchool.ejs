@@ -9,17 +9,268 @@
     <h1>School Profile Administration</h1>
     <p id="schoolname">School: </p>
     <p id="onboardstatus">Onboard Status: </p>
+
+    <h2 id="adminTitle" hidden="hidden">Admins:</h2>
+    <ol id="adminList" hidden="hidden"></ol>
+
+    <h2 id="teacherTitle" hidden="hidden">Teachers:</h2>
+    <ol id="teacherList" hidden="hidden"></ol>
+
+    <h2 id="addAdmin">Add a new admin:</h2>
+    <label for="adminEmail">Enter email:</label>
+    <input id="adminEmail" name="adminEmail">
+    <button type="click" id="adminButton">Add as admin</button>
+    </form>
+
+    <h2 id="addTeacher">Add a new teacher:</h2>
+    <label for="teacherEmail">Enter email:</label>
+    <input id="teacherEmail" name="teacherEmail">
+    <button type="click" id="teacherButton">Add as teacher</button>
+    </form>
   </body>
 
   <script>
     const school = localStorage.getItem('school');
     const onboarded = localStorage.getItem('onboarded');
+    var userEmails = [];
     if (school) {
       document.getElementById('schoolname').innerHTML += school;
-      document.getElementById('onboardstatus').innerHTML += onboarded;
+      document.getElementById('onboardstatus').innerHTML += onboarded ? "Completed" : "Not completed";
     } else {
       window.location.href = "/myschools";
     }
+
+    if (localStorage.getItem('firebtoken')) {
+      var buttons = {"admin": document.getElementById("adminButton"), "teacher": document.getElementById("teacherButton")};
+      var types = ["teacher", "admin"]
+      types.forEach(function (type) {
+        findPeople(localStorage.getItem('firebtoken'), type);
+        buttons[type].addEventListener('click', function () {sendAddRole(type)});
+      });
+    } else {
+      window.location.href = "/login";
+    }
+
+    checkPermissions(localStorage.getItem('firebtoken'))
+
+    async function checkPermissions(firebtoken) {
+      var response = await fetch("/admin/isrole", {
+        method: "POST",
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          firebtoken: firebtoken,
+          school: school,
+          role: 'admin'
+        })
+      });
+      var json = await response.json();
+      if (response.status == 200) {
+        if (!json.isrole) {
+          window.location.href = "/myschools";
+        }
+      } else {
+        console.log("Couldn't check permissions");
+        window.location.href = "/myschools";
+      }
+    }
+  
+    async function sendAddRole(role) {
+      var email = document.getElementById(role+"Email").value;
+      if (!(email.includes('@'))) {
+        alert("Not a valid email");
+      } else if (userEmails.includes(email)) {
+        alert("User already has a role in this school");  
+      } else {
+        var response = await fetch("/admin/isuser", {
+          method: "POST",
+          headers: {
+              'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            email: email
+          })
+        });
+        var json = await response.json();
+
+        if (response.status == 200) {
+          if (json.isuser) {
+            var response2 = await fetch("/admin/add", {
+              method: "POST",
+              headers: {
+              'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                userid: json.userid,
+                school: school,
+                role: role
+              })
+            });
+            var json2 = await response2.json();
+            if (response.status == 200) {
+              location.reload();
+            } else {
+              alert("Could not add user");
+            }
+          } else {
+            alert("Not a valid account email");
+          }
+        } else {
+          alert("Could not access database")
+        }
+      }
+    }
+
+    async function changeRole(userid, currentRole, newRole, numRole, isme, button) {
+      checkPermissions(localStorage.getItem('firebtoken'));
+      if (currentRole == 'admin' && numRole == 1) {
+        alert("You cannot demote this user since they are the only admin for this school");
+      } else if (isme && currentRole == 'admin' && !confirm("Are you sure? You will no longer have admin rights for this school")) {
+        button.removeAttribute("disabled");
+        return true;
+      } else {
+        if (currentRole) {
+          //Check if the info is up-to-date, otherwise refresh page
+          var response3 = await fetch("/admin/isrole", {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              userid: userid,
+              school: school,
+              role: currentRole
+            })
+          });
+          var json3 = await response3.json();
+          if (response3.status == 200) {
+            if (!json3.isrole) {
+              location.reload();
+              return ;
+            }
+          } else {
+            location.reload();
+            return ;
+          }
+
+          //remove old role
+          var response = await fetch("/admin/remove", {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              userid: userid,
+              school: school,
+              role: currentRole
+            })
+          });
+          var json = await response.json();
+        }
+        if (response.status == 200 || !currentRole) {
+          if (newRole) {
+            //add new role
+            var response2 = await fetch("/admin/add", {
+              method: "POST",
+              headers: {
+                  'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                userid: userid,
+                school: school,
+                role: newRole
+              })
+            });
+            var json2 = await response2.json();
+            if (response2.status == 200) {
+              location.reload();
+            } else {
+              console.log("Failed to add role");
+            }
+          } else {
+            location.reload();
+          }
+        } else {
+          console.log("Failed to remove role");
+        }
+      }
+      button.removeAttribute("disabled");
+      return true;
+    }
+
+    async function findPeople(firebtoken, type) {
+      var elem = document.getElementById(type+"List");
+      var title = document.getElementById(type+"Title");
+      // Post-Request to find people
+      var response = await fetch("/admin/rolesat", {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          firebtoken: firebtoken,
+          school: school,
+          role: type
+        })
+      });
+
+      var json = await response.json();
+
+      if (response.status == 200) {
+        elem.innerHTML = ""; // Clear existing people list
+        if (json.rows.length == 0) {
+          elem.hidden = "hidden";
+          title.hidden = "hidden";
+        } else {
+          elem.removeAttribute("hidden");
+          title.removeAttribute("hidden");
+          json.rows.forEach(function(row) {
+            var li = document.createElement("li");
+            var demotebutton = document.createElement("button");
+            var isme = (json.userid == row.uid)
+            if (isme) {
+              var email = document.createElement("p");
+              email.style = "display: inline;";
+              email.innerHTML = row.email + " (You)";
+            } else {
+              var email = document.createElement("a");
+              email.innerHTML = row.email;
+            }
+            userEmails.push(row.email);
+            li.appendChild(email);
+
+            if (type == 'admin') {
+              demotebutton.innerHTML = "Demote to teacher";
+            } else if (type == 'teacher') {
+              demotebutton.innerHTML = "Remove";
+            }
+
+            demotebutton.style = "margin-left: 20px;";
+            demotebutton.addEventListener("click", function() {
+              demotebutton.disabled = "disabled";
+              changeRole(row.uid, type, type=='admin' ? 'teacher' : null ,json.rows.length, isme, demotebutton);
+            });
+            li.appendChild(demotebutton)
+
+            if (type == 'teacher') {
+              var promotebutton = document.createElement("button");
+              promotebutton.innerHTML = "Promote to admin";
+              promotebutton.style = "margin-left: 20px;";
+              promotebutton.addEventListener("click", function() {
+                promotebutton.disabled = "disabled";
+                changeRole(row.uid, type, 'admin', json.rows.length, isme, promotebutton);
+              });
+              li.appendChild(promotebutton)
+            }
+            elem.appendChild(li);
+          });
+        }
+      } else {
+        alert("Tried but failed to get projects");
+      }
+    }
+
   </script>
   
 </html>

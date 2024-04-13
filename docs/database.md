@@ -69,6 +69,7 @@ The following is the schema, with primary key(s) in bold.
 ### User Table
 Stores personal user data
 - **userid** : String, Firebase Auth UID
+- email: String, user's email
 - defaultschool: String, Name of school they would like to be the default
 
 ### Schools Table

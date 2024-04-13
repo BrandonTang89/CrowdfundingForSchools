@@ -130,11 +130,14 @@ router.get('/', async function (req, res) {
 });
 
 //Adds a role
-//req.body is {firebtoken, school, role}
+//req.body is {firebtoken, school, role} or {userid, school, role}
 router.post('/add', async function (req, res) {
-    var verif = await verifyUser(req.body.firebtoken);
-    if (verif.userid) {
-        const userid = verif.userid
+    var verif
+    if (req.body.firebtoken) {
+        verif = await verifyUser(req.body.firebtoken);
+    }
+    const userid = verif ? verif.userid : req.body.userid
+    if (userid) {
         const addRolePromise = new Promise((resolve, reject) => {
             pool.query("INSERT INTO roles (userid, school, role) VALUES ($1, $2, $3)", [userid, req.body.school, req.body.role], (error, results) => {
                 if (error) {
@@ -156,11 +159,14 @@ router.post('/add', async function (req, res) {
 });
 
 //Removes a role
-//req.body is {firebtoken, school, role}
+//req.body is {firebtoken, school, role} or {userid, school, role}
 router.post('/remove', async function (req, res) {
-    var verif = await verifyUser(req.body.firebtoken);
-    if (verif.userid) {
-        const userid = verif.userid
+    var verif
+    if (req.body.firebtoken) {
+        verif = await verifyUser(req.body.firebtoken);
+    }
+    const userid = verif ? verif.userid : req.body.userid
+    if (userid) {
         const removeRolePromise = new Promise((resolve, reject) => {
             pool.query("DELETE FROM roles WHERE userid = $1 AND school = $2 AND role = $3", [userid, req.body.school, req.body.role], (error, results) => {
                 if (error) {
@@ -170,7 +176,7 @@ router.post('/remove', async function (req, res) {
             });
         })
         removeRolePromise.catch((err) => {
-            console.log("Error deleting role");
+            console.log("Error deleoting role");
             console.log(err);
             res.status(401).send({msg: 'Error deleting role'})
         })
@@ -182,10 +188,14 @@ router.post('/remove', async function (req, res) {
 });
 
 //Checks if a role exists
-//req.body is {firebtoken, school, role}
+//req.body is {firebtoken, school, role} or {userid, school, role}
 router.post('/isrole', async function (req, res) {
-    var verif = await verifyUser(req.body.firebtoken);
-    if (verif.userid) {
+    var verif
+    if (req.body.firebtoken) {
+        verif = await verifyUser(req.body.firebtoken);
+    }
+    const userid = verif ? verif.userid : req.body.userid
+    if (userid) {
         const userid = verif.userid;
         var queryText = "SELECT * FROM roles WHERE userid = $1 AND school = $2 AND role = $3";
         const isRolePromise = new Promise((resolve, reject) => {
@@ -236,6 +246,61 @@ router.post('/schoolswhere', async function (req, res) {
     } else {
         res.status(401).send({msg: verif.msg})
     }
+});
+
+//Lists the users with a given role at a given school
+//req.body is {school, role}
+//Returns an array with rows row = {uid, email}
+router.post('/rolesat', async function (req, res) {
+    const school = req.body.school;
+    const role = req.body.role;
+    var verif = await verifyUser(req.body.firebtoken);
+    if (verif.userid) {
+        const userid = verif.userid;
+        var queryText = "SELECT users.userid AS uid, users.email AS email FROM roles LEFT JOIN users ON roles.userid = users.userid WHERE roles.school=$1 AND roles.role=$2"
+        const rolesPromise = new Promise((resolve, reject) => {
+            pool.query(queryText, [school, role], (error, results) => {
+                if (error) {
+                    reject(error);
+                }
+                resolve(results);
+            });
+        })
+        rolesPromise.then((value) => {
+            res.status(200).send({rows: value.rows, userid: userid});
+        }).catch((err) => {
+            console.log(err);
+            res.status(401).send({msg: "Error retrieving from database"})
+        });
+    } else {
+        res.status(401).send({msg: verif.msg})
+    }
+});
+
+//Checks if the given email is the email for an account
+//returns isuser=true/false, and userid if isuser is true
+router.post('/isuser', async function (req, res) {
+    var queryText = "SELECT * FROM users WHERE email=$1"
+    console.log(queryText);
+    const rolesPromise = new Promise((resolve, reject) => {
+        pool.query(queryText, [req.body.email], (error, results) => {
+            if (error) {
+                reject(error);
+            }
+            resolve(results);
+        });
+    })
+    rolesPromise.then((value) => {
+        if (value.rows.length>0) {
+            res.status(200).send({isuser: true, userid: value.rows[0].userid});
+        } else {
+            res.status(200).send({isuser: false});
+        }
+        
+    }).catch((err) => {
+        console.log(err);
+        res.status(401).send({msg: "Error retrieving from database"})
+    });
 });
 
 
