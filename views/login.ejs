@@ -8,53 +8,15 @@
   <body>
     <%- include('navbar') %>
     <h1>Login Form</h1>
-    <form id="loginForm">
+    <form method="post" id="loginForm">
         <label for="email" >Email</label><br>
-        <input type="text" id="emailField" name="emailField"><br>
+        <input type="text" name="email"><br>
         <label for="password">Password</label><br>
-        <input type="password" id="passField" name="passField">
+        <input type="password" name="password">
         <button type="submit">Submit</button>
     </form>
 
     <a href="/auth/forgot">Forgot Password?</a>
     
   </body>
-  <script>
-    var form = document.getElementById("loginForm");
-    async function sendLogin(event){
-        event.preventDefault();
-        var email = document.getElementById("emailField").value;
-        var pass = document.getElementById("passField").value;
-
-        // Post-Request to Login
-        var response = await fetch("/login", {
-            method: "POST",
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                email: email,
-                password: pass,
-                returnSecureToken: true
-            })
-        })
-
-        
-        var json = await response.json()
-        console.log(json)
-        if (response.status == 200){
-            console.log("Success Login")
-            localStorage.setItem("firebtoken", json.idToken)
-            localStorage.setItem("uid", json.localId)
-
-            // Redirect to Home
-            window.location.href = "/"
-        }
-        else{
-            alert("Tried but failed to login")
-        }
-
-    }
-    form.addEventListener('submit', sendLogin);
-    </script>
 </html>

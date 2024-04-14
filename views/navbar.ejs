@@ -3,27 +3,12 @@
     <a href="/">Home</a>
     <a href="/about">About</a>
     <a href="/projects">Projects</a>
-    <a id="loginlink" href="/login">Login</a>
-    <a id="signuplink" href="/signup">Sign Up</a>
-    <a id="settingslink" href="" style="display: none;">Settings</a>
-    <a id="signoutlink" href="/" style="display: none;">Log Out</a>
-    
 
-    <script>
-      var settingslink = document.getElementById('settingslink');
-      if (localStorage.getItem('firebtoken')) {
-        settingslink.style.display = 'inline';
-        loginlink.style.display = 'none';
-        signuplink.style.display = 'none';
-        signoutlink.style.display = 'inline';
-      }
-      settingslink.addEventListener('click', function(event) {
-        event.preventDefault();
-        window.location.href = '/settings/' + localStorage.getItem('firebtoken');
-      });
-      signoutlink.addEventListener('click', function(event) {
-        localStorage.removeItem('firebtoken');
-        localStorage.removeItem('uid');
-      });
-    </script>
+    <% if (locals.user === undefined) { %>
+      <a id="loginlink" href="/login">Login</a>
+      <a id="signuplink" href="/signup">Sign Up</a>
+    <%} else { %>
+      <a id="settingslink" href="/settings">Settings</a>
+      <a id="signoutlink" href="/logout">Log Out</a>
+    <%} %>
   </div>

@@ -7,10 +7,10 @@
   <body>
     <%- include('navbar') %>
     <h1>Settings Page</h1>
-    <p>UID: <%=uid || ''%></p>
+    <p>UID: <%= locals.user.uid || ''%></p>
     <form id="SettingsForm">
         <label for="email">Email</label><br>
-        <input disabled type="text" id="emailField" name="emailField" value="<%= email || '' %>"><br>
+        <input disabled type="text" id="emailField" name="emailField" value="<%= locals.user.email || '' %>"><br>
     </form>
 
     <h2> Change Password </h2>
@@ -68,7 +68,6 @@
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                idToken: localStorage.getItem("firebtoken"),
                 password: pass
             })
         })
@@ -78,8 +77,6 @@
         if (response.status == 200){
             console.log("Success Change Password")
             alert("Password Changed Successfully, you will need to sign in again with your new password.")
-            localStorage.removeItem("firebtoken")
-            localStorage.removeItem("uid")
             window.location.href = "/login"
         }
         else{
@@ -92,7 +89,7 @@
     async function sendDeleteAccount(event){
         event.preventDefault();
         var email = document.getElementById("confirmEmailField").value;
-        var originalEmail = "<%= email || '' %>"
+        var originalEmail = "<%= locals.user.email || '' %>"
         if (email != originalEmail){
             alert("Email does not match")
             return
@@ -105,17 +102,12 @@
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({
-                idToken: localStorage.getItem("firebtoken"),
-            })
         })
 
         var json = await response.json()
         console.log(json)
         if (response.status == 200){
             console.log("Success Delete Account")
-            localStorage.removeItem("firebtoken")
-            localStorage.removeItem("uid")
             alert("Account Deleted Successfully")
             window.location.href = "/"
         }
@@ -133,7 +125,7 @@
     async function sendAdminForm(event){
         event.preventDefault();
         var school = document.getElementById("schoolField").value;
-        window.location.href = "/admin/?school=" + encodeURIComponent(school) + "&firebtoken=" + localStorage.getItem("firebtoken")
+        window.location.href = "/admin/?school=" + encodeURIComponent(school)
     }
     adminForm.addEventListener('submit', sendAdminForm);
   </script>

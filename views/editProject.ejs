@@ -68,7 +68,6 @@
           description: description,
           goalmoney: goalmoney,
           status: status,
-          firebtoken: localStorage.getItem("firebtoken")
         })
       });
 
@@ -93,9 +92,6 @@
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          firebtoken: localStorage.getItem("firebtoken")
-        })
       });
 
       var json = await response.json();

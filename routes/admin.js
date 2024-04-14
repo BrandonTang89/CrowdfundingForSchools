@@ -12,90 +12,68 @@ async function generateStripeConnectedAccount(school) {
     });
 
     // Add the account to the database
-    const addAccountPromise = new Promise((resolve, reject) => {
-        pool.query("INSERT INTO schools (school, stripeid) VALUES ($1, $2)", [school, account.id], (error, results) => {
-            if (error) {
-                reject(error);
-            }
-            resolve(results);
-        });
-    });
-
-    try {
-        await addAccountPromise;
-    }
-    catch (error) {
-        console.log('Error adding account to database');
-        console.log(error);
-    }
+    const response = await pool.query("INSERT INTO schools (school, stripeid) VALUES ($1, $2)", [school, account.id]);
 
     return account;
 }
 
-router.get('/', async function (req, res) {
-    const school = req.query.school;
-    const firebtoken = req.query.firebtoken;
-    const verif = await isContributorAt(firebtoken, school);
-
-    if (!verif.iscontributor) {
-        res.status(401).send(verif.msg);
-        return;
-    }
-    if (verif.role != 'admin') {
-        console.log(verif);
-        res.status(401).send('You are not an admin at this school');
-        return;
-    }
-
-    var schoolData = await schoolQuery(school);
-    console.log(schoolData);
-
-    var account = null;
-    if (schoolData.onboarded == "notCreated") {
-        // Create the account
-        account = await generateStripeConnectedAccount(school);
-        schoolData.onboarded = false;
-    }
-
-    if (schoolData.onboarded == false) {
-        // Check the account status
-        if (account == null) account = await stripe.accounts.retrieve(schoolData.data.stripeid);
-
-        if (account.details_submitted == false) {
-            console.log('School not yet onboarded, creating account link');
-            const accountLink = await stripe.accountLinks.create({
-                account: account.id,
-                refresh_url: `${process.env.DOMAIN}/admin/?school=${encodeURIComponent(school)}&firebtoken=${firebtoken}`,
-                return_url: `${process.env.DOMAIN}/settings/${firebtoken}`,
-                type: 'account_onboarding',
-            });
-
-            console.log(accountLink);
-            res.redirect(accountLink.url);
+router.get('/', async function (req, res, next) {
+    try {
+        //login required
+        if (res.locals.user === undefined) {
+            res.redirect("/login");
             return;
         }
-        else {
-            // Update the database
-            console.log("School onboarded, updating database");
-            const updatePromise = new Promise((resolve, reject) => {
-                pool.query("UPDATE schools SET onboarded = true WHERE school = $1 RETURNING *", [school], (error, results) => {
-                    if (error) {
-                        reject(error);
-                    }
-                    resolve(results[0]); // return the one row that has been updated
+
+        const school = req.query.school;
+        const verif = await isContributorAt(res.locals.user, school);
+
+        if (!verif.iscontributor) {
+            throw new Error("You are not a contributor at this school");
+        }
+        
+        if (verif.role != 'admin') {
+            throw new Error("You are not an admin at this school");
+        }
+
+        var schoolData = await schoolQuery(school);
+        console.log(schoolData);
+
+        var account = null;
+        if (schoolData.onboarded == "notCreated") {
+            // Create the account
+            account = await generateStripeConnectedAccount(school);
+            schoolData.onboarded = false;
+        }
+
+        if (schoolData.onboarded == false) {
+            // Check the account status
+            if (account == null) account = await stripe.accounts.retrieve(schoolData.data.stripeid);
+
+            if (account.details_submitted == false) {
+                console.log('School not yet onboarded, creating account link');
+                const accountLink = await stripe.accountLinks.create({
+                    account: account.id,
+                    refresh_url: `${process.env.DOMAIN}/admin/?school=${encodeURIComponent(school)}`,
+                    return_url: `${process.env.DOMAIN}/settings/${req.cookies.firebtoken}`,
+                    type: 'account_onboarding',
                 });
-            });
-            try {
-                schoolData = await updatePromise;
+
+                console.log(accountLink);
+                res.redirect(accountLink.url);
+                return;
             }
-            catch (error) {
-                console.log('Error updating database');
-                console.log(error);
+            else {
+                // Update the database
+                console.log("School onboarded, updating database");
+                schoolData = await pool.query("UPDATE schools SET onboarded = true WHERE school = $1 RETURNING *", [school]);
             }
         }
-    }
 
-    res.render('admin', { schooldata: schoolData, school: school });
+        res.render('admin', { schooldata: schoolData, school: school });
+    } catch(err) {
+        res.status(401).send(err);
+    }
 });
 
 

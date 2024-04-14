@@ -8,7 +8,9 @@
     <%- include('navbar') %>
 
     <h1>Projects to Crowdfund</h1>
-    <a id="proposeLink">Propose a project</a>
+    <% if (res.locals.user !== undefined) { %>
+      <a id="proposeLink">Propose a project</a>
+    <% } %>
 
     <h2>List of Projects</h2>
     <!-- TODO: Filtering Form, defaults to open projects, default school if logged in -->
@@ -66,13 +68,6 @@
 
     // Initial Load
     sendFilter(new Event('submit'));
-
-    var proposeLink = document.getElementById('proposeLink');
-    if (localStorage.getItem('firebtoken')) {
-      proposeLink.href = '/projects/create/?firebtoken=' + localStorage.getItem('firebtoken');
-    } else {
-      proposeLink.style = 'display: none;';
-    }
   </script>
   
 </html>
