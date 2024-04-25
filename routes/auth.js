@@ -156,7 +156,13 @@ router.post('/deleteaccount', async function(req, res, next) {
 
     //login required
     if (user === undefined) {
-      res.redirect("/");
+      res.status(400).send("You are not logged in.");
+      return;
+    }
+
+    const roles = await pool.query("SELECT * FROM roles WHERE userid = $1", [user.userid]);
+    if (roles.rowCount > 0) {
+      res.status(400).send("You cannot delete your account because you still have admin privileges.");
       return;
     }
     

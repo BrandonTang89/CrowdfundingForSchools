@@ -19,17 +19,11 @@
     <ol id="adminList" hidden="hidden"></ol>
   </body>
   <script>
-    if (localStorage.getItem('firebtoken')) {
-      var types = ["favourite", "teacher", "admin"]
-      types.forEach(function (type) {
-        findSchools(localStorage.getItem('firebtoken'), type);
-      });
-    } else {
-      window.location.href = "/login";
-    }
+    var types = ["favourite", "teacher", "admin"]
+    types.forEach(findSchools);
 
     async function sendManage(school){
-      var response = await fetch("/admin/?school="+encodeURIComponent(school)+"&firebtoken="+localStorage.getItem('firebtoken'), {
+      var response = await fetch("/admin/?school="+encodeURIComponent(school), {
           method: "GET",
           headers: {
               'Content-Type': 'application/json'
@@ -51,7 +45,7 @@
       }
     }
 
-    async function findSchools(firebtoken, type) {
+    async function findSchools(type) {
       var elem = document.getElementById(type+"List");
       var title = document.getElementById(type+"Title");
       // Post-Request to find schools
@@ -61,7 +55,6 @@
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          firebtoken: firebtoken,
           role: type
         })
       });
@@ -97,8 +90,6 @@
             elem.appendChild(li);
           });
         }
-      } else {
-        alert("Tried but failed to get projects");
       }
     }
   </script>

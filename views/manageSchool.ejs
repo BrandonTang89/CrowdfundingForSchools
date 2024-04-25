@@ -40,27 +40,13 @@
       window.location.href = "/myschools";
     }
 
-    if (localStorage.getItem('firebtoken')) {
-      var buttons = {"admin": document.getElementById("adminButton"), "teacher": document.getElementById("teacherButton")};
-      var types = ["teacher", "admin"]
-      types.forEach(function (type) {
-        findPeople(localStorage.getItem('firebtoken'), type);
-        buttons[type].addEventListener('click', function () {sendAddRole(type)});
-      });
-    } else {
-      window.location.href = "/login";
-    }
-
-    checkPermissions(localStorage.getItem('firebtoken'))
-
-    async function checkPermissions(firebtoken) {
+    async function checkPermissions() {
       var response = await fetch("/admin/isrole", {
         method: "POST",
         headers: {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          firebtoken: firebtoken,
           school: school,
           role: 'admin'
         })
@@ -123,7 +109,7 @@
     }
 
     async function changeRole(userid, currentRole, newRole, numRole, isme, button) {
-      checkPermissions(localStorage.getItem('firebtoken'));
+      checkPermissions();
       if (currentRole == 'admin' && numRole == 1) {
         alert("You cannot demote this user since they are the only admin for this school");
       } else if (isme && currentRole == 'admin' && !confirm("Are you sure? You will no longer have admin rights for this school")) {

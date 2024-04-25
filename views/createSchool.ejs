@@ -41,7 +41,7 @@
       console.log(name)
 
       // Post-Request to Create Project
-      var response = await fetch("/admin/?school="+name+"&firebtoken="+localStorage.getItem("firebtoken"), {
+      var response = await fetch("/admin/?school="+name, {
         method: "GET",
         headers: {
           'Content-Type': 'application/json'
