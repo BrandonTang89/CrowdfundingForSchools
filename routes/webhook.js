@@ -12,25 +12,11 @@ function logDonation(donationData) {
     const amtinpounds = Math.floor(donationData.amount / 100);
 
     // Update the projects list
-    const projectupdate = new Promise((resolve, reject) => {
-        pool.query("UPDATE projects SET currentmoney = currentmoney + $1 WHERE projectid = $2", [amtinpounds, donationData.projectid], (error, results) => {
-            if (error) {
-                reject(error);
-            }
-            resolve(results);
-        });
-    });
+    const projectupdate = pool.query("UPDATE projects SET currentmoney = currentmoney + $1 WHERE projectid = $2", [amtinpounds, donationData.projectid]);
 
     // Update the donations list
     const donationdate = new Date().toISOString();
-    const donationupdate = new Promise((resolve, reject) =>
-        pool.query("INSERT INTO donations (projectid, userid, amount, donationdate) VALUES ($1, $2, $3, $4)", [donationData.projectid, donationData.userid, amtinpounds, donationdate], (error, results) => {
-            if (error) {
-                reject(error);
-            }
-            resolve(results);
-        })
-    );
+    const donationupdate = pool.query("INSERT INTO donations (projectid, userid, amount, donationdate) VALUES ($1, $2, $3, $4)", [donationData.projectid, donationData.userid, amtinpounds, donationdate]);
 
     Promise.all([projectupdate, donationupdate]).then(() => {
         console.log("Donation logged successfully");

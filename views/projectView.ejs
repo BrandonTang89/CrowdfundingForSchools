@@ -30,7 +30,6 @@
 
     async function checkEligibility() {
       var school = "<%= project.school %>";
-      var firebtoken = localStorage.getItem('firebtoken');
       var response = await fetch("<%= project.projectid %>", {
         method: "POST",
         headers: {
@@ -38,7 +37,6 @@
         },
         body: JSON.stringify({
           school: school,
-          firebtoken: firebtoken
         })
       });
 
@@ -47,7 +45,7 @@
         console.log("Eligible for editing: " + responseBody);
         var editProjectButton = document.getElementById("editProjectButton");
         editProjectButton.style.display = 'block';
-        editProjectButton.href = "/projects/edit/" + "<%= project.projectid %>" + "?firebtoken=" + firebtoken;
+        editProjectButton.href = "/projects/edit/" + "<%= project.projectid %>";
       }
       else {
         console.log("Not Eligible for editing: " + responseBody);
@@ -62,7 +60,6 @@
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(localStorage.getItem('uid') ? {userid: localStorage.getItem('uid')} : {})
     });
 
     var json = await response.json();

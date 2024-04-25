@@ -13,91 +13,80 @@ router.get('/about', function (req, res) {
 });
 
 router.get('/login', function (req, res) {
-  res.render('login');
+  if (res.locals.user === undefined) {
+    res.render('login');
+  } else {
+    res.redirect('/')
+  }
 });
 
-router.post('/login', function (req, res) {
-  const authEndPoint = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${process.env.API_KEY}`;
-  const requestData = req.body;
+router.post('/login', async function (req, res, next) {
+  try {
+    
+    const authEndPoint = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${process.env.API_KEY}`;
+    const requestData = {
+      returnSecureToken: true,
+      ...req.body
+    };
 
-  axios.post(authEndPoint, requestData)
-    .then(response => {
-      // Handle the response
-      console.log(response.data);
-      res.send(response.data);
-    })
-    .catch(error => {
-      // Handle the error
-      console.log(error);
-      res.status(401);
-      res.send(error);
-    });
+    let response = await axios.post(authEndPoint, requestData);
+
+    res.cookie('firebtoken', response.data.idToken, { maxAge: 3600000 });
+    res.redirect('/');
+
+  } catch(e) {
+    next(e)
+  }
+});
+
+router.get('/logout', async function (req, res, next) {
+  res.clearCookie('firebtoken');
+  res.redirect('/');
 });
 
 router.get('/signup', function (req, res) {
   res.render('signup');
 });
 
-router.get('/settings/:firebtoken', async function (req, res) {
+router.get('/settings', async function (req, res, next) {
   try {
-    var decodedToken = await getAuth().verifyIdToken(req.params.firebtoken);
-    var uid = decodedToken.uid;
-
-    try {
-      var userRecord = await getAuth().getUser(uid)
-      if (userRecord.emailVerified == false) {
-        return res.redirect('/auth/verify?firebtoken=' + req.params.firebtoken);
-      }
-      var email = userRecord.email;
-      var displayName = userRecord.displayName;
-
-      console.log('User data:', email, displayName);
-
-      const getAdminSchools = (userid) => {
-        return new Promise((resolve, reject) => {
-          pool.query("SELECT * FROM roles WHERE userid = $1 AND (role = 'admin' OR role = 'teacher')", [userid], (error, results) => {
-            if (error) {
-              reject(error);
-            }
-            const schools = results.rows.map(row => row.school);
-            resolve(schools);
-          });
-        });
-      };
-
-      var adminschools = {};
-      try {
-        adminschools = {};//await getAdminSchools(uid);
-      } catch (error) {
-        console.log('Error fetching admin schools:', error);
-        res.status(401).send(error);
-        return;
-      }
-
-      res.render('settings', { uid: decodedToken.uid, email: email, displayName: displayName, adminschools: adminschools });
-
+    //login required.
+    if (res.locals.user === undefined) {
+      res.redirect('/login')
+      return;
     }
-    catch (error) {
-      console.log('Error fetching user data:', error);
-      res.send('Error fetching user data:', error);
-    };
-  }
-  catch (e) {
-    console.log(e)
-    res.send('Something went wrong with verifying your token.');
-  }
+  
+    const user = res.locals.user;
+    console.log('User data:', user);
+    res.render('settings');
 
+  } catch(e) {
+    next(e);
+  }
 });
 
-router.get('/createSchool', function (req, res) {
+router.get('/createSchool', function (req, res, next) {
+  if (res.locals.user === undefined) {
+    res.redirect('/login');
+    return;
+  }
+
   res.render('createSchool');
 });
 
 router.get('/mySchools', function (req, res) {
+  if (res.locals.user === undefined) {
+    res.redirect('/login');
+    return;
+  }
   res.render('mySchools');
 })
 
 router.get('/manageSchool', function (req, res) {
+  if (res.locals.user === undefined) {
+    res.redirect('/login');
+    return;
+  }
   res.render('manageSchool');
 })
 

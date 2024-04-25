@@ -7,8 +7,10 @@
   <body>
     <%- include('navbar') %>
 
-    <h1 id="title">Projects to Crowdfund</h1>
-    <a id="proposeLink">Propose a project</a>
+    <h1>Projects to Crowdfund</h1>
+    <% if (locals.user !== undefined) { %>
+      <a id="proposeLink">Propose a project</a>
+    <% } %>
 
     <h2>List of Projects</h2>
     <form id="filterForm">
@@ -47,12 +49,12 @@
       schoolslabel.hidden = "hidden";
       schools.hidden = "hidden"
     } else {
-      if (localStorage.getItem('firebtoken')) {
-        addFavourites(localStorage.getItem('firebtoken'));
-      } else {
+      <% if (locals.user !== undefined) { %>
+        //addFavourites();
+      <% } else { %>
         schoolslabel.hidden = "hidden";
         schools.hidden = "hidden"
-      }
+      <% } %>
     }
 
     var form = document.getElementById("filterForm");
@@ -97,14 +99,13 @@
       }
     }
 
-    async function addFavourites(firebtoken) {
+    async function addFavourites() {
       var response = await fetch("/admin/schoolswhere", {
         method: "POST",
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-            firebtoken: firebtoken,
             role: 'favourite'
           })
       });
@@ -123,13 +124,6 @@
 
     // Initial Load
     sendFilter(new Event('submit'));
-
-    var proposeLink = document.getElementById('proposeLink');
-    if (localStorage.getItem('firebtoken')) {
-      proposeLink.href = '/projects/create/?firebtoken=' + localStorage.getItem('firebtoken');
-    } else {
-      proposeLink.style = 'display: none;';
-    }
   </script>
   
 </html>

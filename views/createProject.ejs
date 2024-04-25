@@ -13,7 +13,7 @@
       <!-- To do is a link to it -->
     </p>
 
-    <form id="createProjectForm">
+    <form method="post" action="/projects.js" id="createProjectForm">
       <label for="title">Title:</label>
       <br />
       <input type="text" id="title" name="title" />
@@ -61,7 +61,6 @@
           school: school,
           description: description,
           goalmoney: goalmoney,
-          firebtoken: localStorage.getItem("firebtoken")
         })
       });
 

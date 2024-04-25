@@ -2,38 +2,15 @@
     <span>Crowdfunding for Schools</span>
     <a href="/">Home</a>
     <a href="/about">About</a>
-    <a href="/projects">Projects</a>
-    <a href="/schools">Schools</a>
-    <a id="myschoolslink" href="/myschools" style="display: none;">My schools</a>
-    <a id="createschoollink" href="/createSchool" style="display: none;">Create a school</a>
-    <a id="loginlink" href="/login">Login</a>
-    <a id="signuplink" href="/signup">Sign Up</a>
-    <a id="settingslink" href="" style="display: none;">Settings</a>
-    <a id="signoutlink" href="/" style="display: none;">Log Out</a>
     
-
-    <script>
-      var settingslink = document.getElementById('settingslink');
-      var loginlink = document.getElementById('loginlink');
-      var signuplink = document.getElementById('signuplink');
-      var signoutlink = document.getElementById('signoutlink');
-      var myschoolslink = document.getElementById('myschoolslink');
-      var createschoollink = document.getElementById('createschoollink');
-      if (localStorage.getItem('firebtoken')) {
-        settingslink.style.display = 'inline';
-        loginlink.style.display = 'none';
-        signuplink.style.display = 'none';
-        signoutlink.style.display = 'inline';
-        myschoolslink.style.display = 'inline';
-        createschoollink.style.display = 'inline';
-      }
-      settingslink.addEventListener('click', function(event) {
-        event.preventDefault();
-        window.location.href = '/settings/' + localStorage.getItem('firebtoken');
-      });
-      signoutlink.addEventListener('click', function(event) {
-        localStorage.removeItem('firebtoken');
-        localStorage.removeItem('uid');
-      });
-    </script>
+    <% if (locals.user !== undefined) { %>
+      <a href="/projects">Projects</a>
+      <a id="myschoolslink" href="/myschools">My schools</a>
+      <a id="createschoollink" href="/createSchool">Create a school</a>  
+      <a id="settingslink" href="/settings">Settings</a>
+      <a id="signoutlink" href="/logout">Log Out</a>
+      <%} else { %>
+      <a id="loginlink" href="/login">Login</a>
+      <a id="signuplink" href="/signup">Sign Up</a>
+    <%} %>
   </div>

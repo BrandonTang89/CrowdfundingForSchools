@@ -20,6 +20,7 @@ app.use(express.json());
 var serviceAccount = require("./env/service.json");
 const { initializeApp } = require('firebase-admin/app');
 var admin = require("firebase-admin");
+const { verifyUser } = require('./authFunctions');
 initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
@@ -33,6 +34,21 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+//Get session token & login info
+app.use(async function (req, res, next) {
+  try {
+    const firebtoken = req.cookies.firebtoken;
+
+    if (firebtoken !== undefined) {
+      res.locals.user = await verifyUser(firebtoken);
+    }
+  
+    next();
+  } catch (e) {
+    next(e)
+  }
+});
 
 app.use('/', indexRouter);
 app.use('/auth', authRouter);
@@ -48,6 +64,11 @@ app.use(function(req, res, next) {
 
 // error handler
 app.use(function(err, req, res, next) {
+  //If attempted to login unsuccessfully, then we logout.
+  if (req.cookies.firebtoken !== undefined && res.locals.user === undefined) {
+      res.clearCookie('firebtoken');
+  }
+
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
