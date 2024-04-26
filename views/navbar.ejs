@@ -41,23 +41,4 @@
         </div>
       </div>
     </nav>   
-
-    <script>
-      var settingslink = document.getElementById('settingslink');
-      if (localStorage.getItem('firebtoken')) {
-        settingslink.style.display = 'inline';
-        loginlink.style.display = 'none';
-        signuplink.style.display = 'none';
-        signoutlink.style.display = 'inline';
-      }
-      settingslink.addEventListener('click', function(event) {
-        event.preventDefault();
-        window.location.href = '/settings/' + localStorage.getItem('firebtoken');
-      });
-      signoutlink.addEventListener('click', function(event) {
-        localStorage.removeItem('firebtoken');
-        localStorage.removeItem('uid');
-      });
-    </script>
-</div>
-    
+</div> 
