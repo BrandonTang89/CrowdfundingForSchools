@@ -112,6 +112,38 @@ body{
     --bs-btn-active-border-color: #7572E8;
 }
 
+.btn-donate{
+    --bd-violet-bg: #71B451;
+    --bd-violet-rgb: 112.520718, 44.062154, 249.437846;
+
+    --bs-btn-color: var(--bs-white);
+    --bs-btn-bg: var(--bd-violet-bg);
+    --bs-btn-border-color: var(--bd-violet-bg);
+    --bs-btn-hover-color: var(--bs-white);
+    --bs-btn-hover-bg: #528938;
+    --bs-btn-hover-border-color: #528938;
+    --bs-btn-focus-shadow-rgb: var(--bd-violet-rgb);
+    --bs-btn-active-color: var(--bs-btn-hover-color);
+    --bs-btn-active-bg: #71B451;
+    --bs-btn-active-border-color: #71B451;
+}
+
+.btn-edit{
+    --bd-violet-bg: #7572E8;
+    --bd-violet-rgb: 112.520718, 44.062154, 249.437846;
+
+    --bs-btn-color: var(--bs-white);
+    --bs-btn-bg: var(--bd-violet-bg);
+    --bs-btn-border-color: var(--bd-violet-bg);
+    --bs-btn-hover-color: var(--bs-white);
+    --bs-btn-hover-bg: #492F75;
+    --bs-btn-hover-border-color: #492F75;
+    --bs-btn-focus-shadow-rgb: var(--bd-violet-rgb);
+    --bs-btn-active-color: var(--bs-btn-hover-color);
+    --bs-btn-active-bg: #7572E8;
+    --bs-btn-active-border-color: #7572E8;
+}
+
 /*---- responsive css -----*/
 @media only screen and (min-width: 768px) and (max-width: 991px){
     .carousel-caption{
