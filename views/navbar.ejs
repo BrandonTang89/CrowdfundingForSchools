@@ -13,21 +13,30 @@
             <li class="nav-item">
               <a class="nav-link" href="/about">About</a>
             </li>
-            <li class="nav-item">
-              <a class="nav-link" href="/projects">Projects</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" id="signuplink" href="/signup">Sign up</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" id="loginlink" href="/login"><b>Login</b></a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" id="settingslink" href="" style="display: none;">Setting</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" id="signoutlink" href="/" style="display: none;"><b>Log Out</b></a>
-            </li>
+            <% if (locals.user !== undefined) { %>
+              <li class="nav-item">
+                <a class="nav-link" href="/projects">Projects</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" id="myschoolslink" href="/myschools">My schools</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" id="createschoollink" href="/createSchool">Create a school</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" id="settingslink" href="/settings">Settings</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" id="signoutlink" href="/logout"><b>Log Out</b></a>
+              </li>
+              <%} else { %>
+                <li class="nav-item">
+                  <a class="nav-link" id="signuplink" href="/signup">Sign up</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" id="loginlink" href="/login"><b>Login</b></a>
+                </li>
+            <%} %>  
           </ul>
         </div>
       </div>
