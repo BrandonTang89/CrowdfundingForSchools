@@ -1,16 +1,44 @@
 <div>
-    <span>Crowdfunding for Schools</span>
-    <a href="/">Home</a>
-    <a href="/about">About</a>
-    
-    <% if (locals.user !== undefined) { %>
-      <a href="/projects">Projects</a>
-      <a id="myschoolslink" href="/myschools">My schools</a>
-      <a id="createschoollink" href="/createSchool">Create a school</a>  
-      <a id="settingslink" href="/settings">Settings</a>
-      <a id="signoutlink" href="/logout">Log Out</a>
-      <%} else { %>
-      <a id="loginlink" href="/login">Login</a>
-      <a id="signuplink" href="/signup">Sign Up</a>
-    <%} %>
-  </div>
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top">
+      <div class="container">
+        <span class="navbar-brand">Crowdfunding for Schools</span>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <a class="nav-link" href="/">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/about">About</a>
+            </li>
+            <% if (locals.user !== undefined) { %>
+              <li class="nav-item">
+                <a class="nav-link" href="/projects">Projects</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" id="myschoolslink" href="/myschools">My schools</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" id="createschoollink" href="/createSchool">Create a school</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" id="settingslink" href="/settings">Settings</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" id="signoutlink" href="/logout"><b>Log Out</b></a>
+              </li>
+              <%} else { %>
+                <li class="nav-item">
+                  <a class="nav-link" id="signuplink" href="/signup">Sign up</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" id="loginlink" href="/login"><b>Login</b></a>
+                </li>
+            <%} %>  
+          </ul>
+        </div>
+      </div>
+    </nav>   
+</div> 
