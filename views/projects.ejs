@@ -124,6 +124,12 @@
 
     // Initial Load
     sendFilter(new Event('submit'));
+    var proposeLink = document.getElementById('proposeLink');
+    if (localStorage.getItem('firebtoken')) {
+      proposeLink.href = '/projects/create?firebtoken=' + localStorage.getItem('firebtoken');
+    } else {
+      proposeLink.style = 'display: none;';
+    }
   </script>
   
 </html>
