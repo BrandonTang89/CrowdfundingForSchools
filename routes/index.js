@@ -5,7 +5,11 @@ const pool = require('../db.js');
 var router = express.Router();
 
 router.get('/', function (req, res) {
-  res.render('index', { title: 'Crowd-Funding for Schools Website' });
+  res.redirect("/about");
+});
+
+router.get('/index', function (req, res) {
+  res.redirect("/about");
 });
 
 router.get('/about', function (req, res) {

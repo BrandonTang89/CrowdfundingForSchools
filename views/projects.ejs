@@ -2,14 +2,16 @@
 <html>
   <head>
     <title>Projects</title>
-    <link rel='stylesheet' href='/stylesheets/style.css' />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="/stylesheets/style.css">
   </head>
   <body>
     <%- include('navbar') %>
 
     <h1>Projects to Crowdfund</h1>
     <% if (locals.user !== undefined) { %>
-      <a id="proposeLink">Propose a project</a>
+      <a href="/projects/create" id="proposeLink">Propose a project</a>
     <% } %>
 
     <h2>List of Projects</h2>
@@ -50,7 +52,7 @@
       schools.hidden = "hidden"
     } else {
       <% if (locals.user !== undefined) { %>
-        //addFavourites();
+        addFavourites();
       <% } else { %>
         schoolslabel.hidden = "hidden";
         schools.hidden = "hidden"

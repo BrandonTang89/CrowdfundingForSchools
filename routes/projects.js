@@ -27,9 +27,12 @@ router.post('/', async function (req, res) {
         }
 
         if (req.body.status != 'any') {
-            args.push(req.body.school);
-            query += `AND school = $${args.length} `;
+            args.push(req.body.status);
+            query += `AND status = $${args.length} `;
         }
+
+        console.log(query);
+        console.log(args);
 
         // Query the database
         const results = await pool.query(query, args);
@@ -52,7 +55,8 @@ router.get('/propose', function (req, res) {
 
 router.get('/create', async function (req, res, next) {
     //login required
-    if (res.locals.user === undefined) {
+    const user = res.locals.user;
+    if (user === undefined) {
         next("You are not logged in.");
         return;
     }
@@ -60,7 +64,6 @@ router.get('/create', async function (req, res, next) {
     try {
         console.log("User loading project creation form: ", user);
         const response = await pool.query("SELECT * FROM roles WHERE userid = $1 AND (role = 'admin' OR role = 'teacher')", [user.userid]);
-        const user = res.locals.user;
         console.log("User loading project creation form: ", user);
         const results = await pool.query("SELECT * FROM roles WHERE userid = $1", [user.userid]);
             
@@ -70,7 +73,6 @@ router.get('/create', async function (req, res, next) {
 
         const schools = results.rows.map(row => row.school);
         res.render('createProject', { schools, });
-
     } catch (e) {
         next(e);
     }
@@ -79,14 +81,13 @@ router.get('/create', async function (req, res, next) {
 
 router.post('/create', async function (req, res, next) {
     try {
+        const user = res.locals.user
         //login required.
-        if (res.locals.user === undefined) {
-            res.redirect('/login');
+        if (user === undefined) {
+            res.status(401).send("You are not logged in.");
             return;
         }
         
-        const user = res.locals.user;
-
         console.log("User creating project: ", user, req.body)
 
         const userid = user.userid;
@@ -136,7 +137,7 @@ router.post('/create', async function (req, res, next) {
 
         res.send({ msg: "success", projectid: projectid });
     } catch(err) {
-        res.status(401).send(err);
+        res.status(401).send("" + err);
     }
 });
 
