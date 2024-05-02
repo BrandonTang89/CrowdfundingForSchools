@@ -62,8 +62,7 @@ router.get('/create', async function (req, res, next) {
     }
 
     try {
-        console.log("User loading project creation form: ", user);
-        const response = await pool.query("SELECT * FROM roles WHERE userid = $1 AND (role = 'admin' OR role = 'teacher')", [user.userid]);
+        const user = res.locals.user;
         console.log("User loading project creation form: ", user);
         const results = await pool.query("SELECT * FROM roles WHERE userid = $1", [user.userid]);
             
