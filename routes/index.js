@@ -4,6 +4,16 @@ const axios = require('axios');
 const pool = require('../db.js');
 var router = express.Router();
 
+function generateRandomPassword(length) {
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let password = '';
+  for (let i = 0; i < length; i++) {
+    const randomIndex = Math.floor(Math.random() * characters.length);
+    password += characters.charAt(randomIndex);
+  }
+  return password;
+}
+
 router.get('/', function (req, res) {
   res.redirect("/about");
 });
@@ -46,6 +56,28 @@ router.post('/login', async function (req, res, next) {
 router.get('/logout', async function (req, res, next) {
   res.clearCookie('firebtoken');
   res.redirect('/');
+});
+
+router.post('/signup', async function(req, res, next) {
+  try {
+    const authEndPoint = `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${process.env.API_KEY}`
+    const requestData = {
+      email: req.body.emailField,
+      password: generateRandomPassword(8),
+    };
+
+    console.log(requestData);
+
+    axios.defaults.withCredentials = true;
+    const response = await axios.post(authEndPoint, requestData);
+    console.log(response.data);
+
+    res.cookie('firebtoken', response.data.idToken, { maxAge: 3600000 });
+    res.redirect('/');
+  } catch(e) {
+    console.log(e);
+    next(e)
+  }
 });
 
 router.get('/signup', function (req, res) {

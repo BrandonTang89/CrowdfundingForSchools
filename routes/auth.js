@@ -5,39 +5,6 @@ const axios = require('axios');
 const pool = require('../db.js');
 var router = express.Router();
 
-function generateRandomPassword(length) {
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let password = '';
-  for (let i = 0; i < length; i++) {
-    const randomIndex = Math.floor(Math.random() * characters.length);
-    password += characters.charAt(randomIndex);
-  }
-  return password;
-}
-
-router.post('/signup', async function(req, res, next) {
-  try {
-
-    const authEndPoint = `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${process.env.API_KEY}`
-    const requestData = {
-      email: req.body.email
-    };
-
-    const randomPassword = generateRandomPassword(8); // Change the length as per your requirement
-    console.log(randomPassword);
-    requestData.password = randomPassword; // dummy password
-
-    const response = await axios.post(authEndPoint, requestData);
-    console.log(response);
-
-    res.cookie('firebtoken', response.data, { maxAge: 3600000 });
-    res.redirect('/');
-
-  } catch(e) {
-    next(e)
-  }
-});
-
 router.get('/verify', async function(req, res, next) {
   try{
     var decodedToken = await getAuth().verifyIdToken(req.cookies.firebtoken);
@@ -60,7 +27,6 @@ router.get('/verify', async function(req, res, next) {
     console.log(response.data);
     
     res.render('verifyEmail', { uid: decodedToken.uid, email: email, displayName: displayName});
-  
   }
   catch (e){
     next(e)
