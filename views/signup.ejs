@@ -56,14 +56,45 @@
                   <button class="btn btnlg btn-light w-100 fs-7"><img src="/images/google-logo.png" style="width: 20px" class="me-2"><small>Sign Up with Google</small></button>
                 </div>
                 <div class="alreadyHaveAccount">
-                  <span><small> Already have an account? <a href="#">Log in here</a></small></span>
+                  <span><small> Already have an account? <a href="/login">Log in here</a></small></span>
                 </div>
               </div>        
           </div>
         </form>
       </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous">
+      /*var form = document.getElementById("signupform");
+        async function sendLogin(event) {
+            event.preventDefault();
+            var email = document.getElementById("emailField").value;
+
+            // Post-Request to Sign Up
+            var response = await fetch("/auth/signup", {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    email: email,
+                })
+            });
+
+            var json = await response.json();
+            if (response.status == 200) {
+                console.log("Success Sign Up");
+                localStorage.setItem("firebtoken", json.idToken);
+                localStorage.setItem("uid", json.localId);
+
+                // Redirect to settings
+                window.location.href = "/auth/verify?firebtoken=" + json.idToken;
+            } else {  
+                alert("Tried but failed to Sign Up");
+            }
+        }
+
+        form.addEventListener('submit', sendLogin);*/
+    </script>
   </body>
 </html>
        
