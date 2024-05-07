@@ -39,6 +39,7 @@ router.post('/login', async function (req, res, next) {
     res.redirect('/');
 
   } catch(e) {
+    console.log(e);
     next(e)
   }
 });

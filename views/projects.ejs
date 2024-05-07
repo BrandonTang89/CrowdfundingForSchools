@@ -11,10 +11,10 @@
 
     <h1>Projects to Crowdfund</h1>
     <% if (locals.user !== undefined) { %>
-      <a href="/projects/create" id="proposeLink">Propose a project</a>
+      <a href="/projects/create" id="proposeLink">Create a project</a>
     <% } %>
 
-    <h2>List of Projects</h2>
+    <h2 id="title">List of Projects</h2>
     <form id="filterForm">
       <label for="filter">Search:</label>
       <input type="text" id="searchQuery" name="searchQuery" />
@@ -49,7 +49,7 @@
       var title = document.getElementById("title");
       title.innerHTML += " - " + school;
       schoolslabel.hidden = "hidden";
-      schools.hidden = "hidden"
+      schools.hidden = "hidden";
     } else {
       <% if (locals.user !== undefined) { %>
         addFavourites();
@@ -65,8 +65,9 @@
     async function sendFilter(event) {
       event.preventDefault();
       var searchQuery = document.getElementById("searchQuery").value;
-      if (school == "any") {
-        school = schools.value
+      if (school == "any" || !urlParams.has('school')) {
+        school = schools.value;
+        console.log(school);
       }
       var status = document.getElementById("status").value;
       // Post-Request to Filter Projects
@@ -128,7 +129,7 @@
     sendFilter(new Event('submit'));
     var proposeLink = document.getElementById('proposeLink');
     if (localStorage.getItem('firebtoken')) {
-      proposeLink.href = '/projects/create?firebtoken=' + localStorage.getItem('firebtoken');
+      proposeLink.href = '/projects/create';
     } else {
       proposeLink.style = 'display: none;';
     }

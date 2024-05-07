@@ -1,14 +1,14 @@
 -- Create new schools
 INSERT INTO Schools (school)
-VALUES ('School 1'),
-       ('School 2'),
-       ('School''3');
+VALUES ('New College School'),
+       ('Magdalen College School'),
+       ('Oxford High School');
 
 -- Inserting dummy data into the projects table
 INSERT INTO Projects (title, school, description, GoalMoney, CurrentMoney, MinDonation, Status)
-VALUES ('Project 1', 'School 1', 'Description 1', 100, 0, 1, 'proposed'),
-       ('Project 2', 'School 2', 'Description 2', 200, 0, 1, 'open'),
-       ('Project 3', 'School''3', 'Description 3', 300, 0, 1, 'closed');
+VALUES ('New computers for students', 'New College School', 'Description 1', 1000, 200, 1, 'open'),
+       ('Trip to the Ashmolean Museum', 'Magdalen College School', 'Description 2', 200, 50, 1, 'open'),
+       ('New football goals for the playground', 'Oxford High School', 'Description 3', 300, 300, 1, 'closed');
 
 -- Creates a new admin user
 DO $$

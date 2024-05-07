@@ -175,7 +175,7 @@ router.post('/view/:projectid', async function (req, res) {
         
         res.send({ msg: 'Success' });
     } catch(e) {
-        res.status(401).send(err);
+        res.status(401).send(e);
     }
 });
 

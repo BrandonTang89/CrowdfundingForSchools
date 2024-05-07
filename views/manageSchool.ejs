@@ -42,6 +42,14 @@
       window.location.href = "/myschools";
     }
 
+    var buttons = {"admin": document.getElementById("adminButton"), "teacher": document.getElementById("teacherButton")};
+    var types = ["teacher", "admin"]
+    types.forEach(function (type) {
+      findPeople(type);
+      buttons[type].addEventListener('click', function () {sendAddRole(type)});
+    });
+    checkPermissions()
+
     async function checkPermissions() {
       var response = await fetch("/admin/isrole", {
         method: "POST",
@@ -187,7 +195,7 @@
       return true;
     }
 
-    async function findPeople(firebtoken, type) {
+    async function findPeople(type) {
       var elem = document.getElementById(type+"List");
       var title = document.getElementById(type+"Title");
       // Post-Request to find people
@@ -197,14 +205,13 @@
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          firebtoken: firebtoken,
           school: school,
           role: type
         })
       });
 
       var json = await response.json();
-
+      console.log(json);
       if (response.status == 200) {
         elem.innerHTML = ""; // Clear existing people list
         if (json.rows.length == 0) {

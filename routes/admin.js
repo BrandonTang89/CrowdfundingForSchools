@@ -242,9 +242,9 @@ router.post('/schoolswhere', async function (req, res) {
 router.post('/rolesat', async function (req, res) {
     const school = req.body.school;
     const role = req.body.role;
-    var verif = await verifyUser(req.body.firebtoken);
-    if (verif.userid) {
-        const userid = verif.userid;
+    //var verif = await verifyUser(req.body.firebtoken);
+    if (res.locals.user !== undefined) {//(verif.userid) {
+        const userid = res.locals.user.userid;
         var queryText = "SELECT users.userid AS uid, users.email AS email FROM roles LEFT JOIN users ON roles.userid = users.userid WHERE roles.school=$1 AND roles.role=$2"
         const rolesPromise = new Promise((resolve, reject) => {
             pool.query(queryText, [school, role], (error, results) => {
@@ -256,6 +256,7 @@ router.post('/rolesat', async function (req, res) {
         })
         rolesPromise.then((value) => {
             res.status(200).send({rows: value.rows, userid: userid});
+            console.log(value.rows);
         }).catch((err) => {
             console.log(err);
             res.status(401).send({msg: "Error retrieving from database"})
