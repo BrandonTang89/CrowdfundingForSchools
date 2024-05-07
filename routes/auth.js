@@ -20,7 +20,8 @@ router.get('/verify', async function(req, res, next) {
     const emailVerifEndPoint = `https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=${process.env.API_KEY}`;
     const requestData = {
       requestType: "VERIFY_EMAIL",
-      idToken: req.cookies.firebtoken
+      idToken: req.cookies.firebtoken,
+      email,
     };
 
     const response = await axios.post(emailVerifEndPoint, requestData);

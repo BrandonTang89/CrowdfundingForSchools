@@ -74,7 +74,7 @@ router.post('/signup', async function(req, res, next) {
     console.log(response.data);
 
     res.cookie('firebtoken', response.data.idToken, { maxAge: 3600000 });
-    res.redirect('/');
+    res.redirect('/auth/verify');
   } catch(e) {
     console.log(e);
     next(e)
