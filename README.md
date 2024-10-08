@@ -1,5 +1,12 @@
 # Crowdfunding for Schools
-A platform for schools to propose projects and receive donations from the public.
+A working prototype platform for schools to propose projects and receive donations from the public.
+
+# Technologies
+- Docker and SQL for database management (would move to Heroku in production)
+- Google firebase for account management
+- Stripe API for payments
+- Node.js to make an API
+- ReactJS for the front-end website
 
 # Set-Up
 ## Running the application
